@@ -1,4 +1,4 @@
-package com.daninovac.batch.jobs.controller;
+package com.daninovac.batch.jobs.web;
 
 import com.daninovac.batch.jobs.entity.Job;
 import com.daninovac.batch.jobs.service.JobService;

@@ -1,13 +1,13 @@
 version: '3.1'
 services:
   #app:
-    #container_name: batch-jobs-postgresql
-    #image: app-batch-jobs-postgresql
-    #build: ./
-    #ports:
-    #  - "8080:8080"
-    #depends_on:
-    #  - dbpostgresql
+  #container_name: batch-jobs
+  #image: app-batch-jobs
+  #build: ./
+  #ports:
+  #  - "8080:8080"
+  #depends_on:
+  #  - dbpostgresql
   dbpostgresql:
     image: postgres
     container_name: "postgres_db_container"
@@ -15,5 +15,5 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_PASSWORD=admin
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=postgres
       - POSTGRES_DB=batch-db

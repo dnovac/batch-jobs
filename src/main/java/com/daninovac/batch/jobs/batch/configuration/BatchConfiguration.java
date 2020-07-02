@@ -17,7 +17,6 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -33,11 +32,11 @@ public class BatchConfiguration {
 
   @Bean
   public ThreadPoolTaskExecutor jobLauncherTaskExecutorLineList (
-      @Value("${spring.batch.max-job-number}") Integer maxJobNumber
+      //@Value("${spring.batch.max-job-number}") Integer maxJobNumber
   ) {
 
     ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
-    threadPoolExecutor.setMaxPoolSize(maxJobNumber);
+    threadPoolExecutor.setMaxPoolSize(10);
     threadPoolExecutor.setQueueCapacity(0);
     threadPoolExecutor.setKeepAliveSeconds(0);
 
@@ -108,14 +107,14 @@ public class BatchConfiguration {
   @Bean
   public Step importCsvDataStep (
       StepBuilderFactory stepBuilderFactory,
-      FlatFileItemReader<Job> csvFlatItemReader,
+      FlatFileItemReader<com.daninovac.batch.jobs.entity.Job> csvFlatItemReader,
       //Processor processor,
       CsvWriter csvWriter
   ) {
 
     return stepBuilderFactory.get("importCsvDataStep")
         .<com.daninovac.batch.jobs.entity.Job, com.daninovac.batch.jobs.entity.Job>chunk(100)
-        .reader(null)
+        .reader(csvFlatItemReader)
         //.processor(null)
         .writer(csvWriter)
         .build();

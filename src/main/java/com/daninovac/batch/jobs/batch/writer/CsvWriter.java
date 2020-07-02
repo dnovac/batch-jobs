@@ -2,7 +2,7 @@ package com.daninovac.batch.jobs.batch.writer;
 
 
 import com.daninovac.batch.jobs.entity.Job;
-import com.daninovac.batch.jobs.repository.JobRepository;
+import com.daninovac.batch.jobs.repository.BatchJobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -18,13 +18,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CsvWriter implements ItemWriter<Job> {
 
-  private final JobRepository jobRepository;
+  private final BatchJobRepository batchJobRepository;
 
 
   @Override
   public void write (List<? extends Job> list) throws Exception {
 
     log.info("Step write executed! Writing values in database");
-    jobRepository.saveAll(list);
+    batchJobRepository.saveAll(list);
   }
 }

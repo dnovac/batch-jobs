@@ -63,10 +63,10 @@ public class CsvJobService {
 
     private File saveFileInTemporaryFolder(MultipartFile multipartFile) throws IOException {
 
-        File tempLineListDirectory = new File(TEMP_DIRECTORY, "jobs");
+        File tempUploadedFileDirectory = new File(TEMP_DIRECTORY, "jobs");
 
         final String originalFilename = multipartFile.getOriginalFilename();
-        File fileToImport = new File(tempLineListDirectory, originalFilename);
+        File fileToImport = new File(tempUploadedFileDirectory, originalFilename);
 
         try (OutputStream outputStream = new FileOutputStream(fileToImport)) {
             IOUtils.copy(multipartFile.getInputStream(), outputStream);

@@ -34,7 +34,7 @@ public class BatchConfiguration {
 
 
     @Bean
-    public ThreadPoolTaskExecutor jobLauncherTaskExecutorLineList(
+    public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
             @Value("${batch.max-jobs:10}") Integer maxJobs
     ) {
 
@@ -52,14 +52,14 @@ public class BatchConfiguration {
     @Bean
     public JobLauncher asyncJobLauncher(
             JobRepository jobRepository,
-            ThreadPoolTaskExecutor jobLauncherTaskExecutorLineList
+            ThreadPoolTaskExecutor jobLauncherTaskExecutor
     ) throws Exception {
 
         SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
         simpleJobLauncher.setJobRepository(jobRepository);
     /*simpleJobLauncher.setTaskExecutor(TaskExecutor(
         beanFactory,
-        jobLauncherTaskExecutorLineList
+        jobLauncherTaskExecutor
     ));*/
         simpleJobLauncher.afterPropertiesSet();
         return simpleJobLauncher;

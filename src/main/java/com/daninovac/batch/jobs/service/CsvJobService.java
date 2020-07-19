@@ -28,14 +28,11 @@ import java.io.OutputStream;
 public class CsvJobService {
 
   private static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
-
   private static final String JOB_NAME_IMPORT_CSV = "csvImport";
-
   private static final String DELIMITER = "delimiter";
-
   private static final String PATH = "path";
-
   private static final String TIME = "time";
+  private static final String FILENAME = "filename";
 
   private final JobRepository asyncJobLauncher;
 
@@ -53,6 +50,7 @@ public class CsvJobService {
     JobParameters jobParameters = new JobParametersBuilder()
             .addString(PATH, file.getAbsolutePath())
             .addString(DELIMITER, delimiter)
+            .addString(FILENAME, multipartFile.getName())
             .addLong(TIME, System.currentTimeMillis())
             .toJobParameters();
 
@@ -65,8 +63,12 @@ public class CsvJobService {
   private File saveFileInTemporaryFolder(MultipartFile multipartFile) throws IOException {
 
     File tempUploadedFileDirectory = new File(TEMP_DIRECTORY, "jobs");
-    boolean mkdir = tempUploadedFileDirectory.mkdir();
-    if (mkdir) {
+
+    if (!tempUploadedFileDirectory.exists()) {
+      tempUploadedFileDirectory.mkdir();
+    }
+
+    if (tempUploadedFileDirectory.exists()) {
       final String originalFilename = multipartFile.getOriginalFilename();
       File fileToImport = new File(tempUploadedFileDirectory, originalFilename);
 

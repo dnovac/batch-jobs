@@ -28,99 +28,99 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @RequiredArgsConstructor
 public class BatchConfiguration {
 
-    private final BeanFactory beanFactory;
+  private final BeanFactory beanFactory;
 
-    private final JobBuilderFactory jobBuilderFactory;
-
-
-    @Bean
-    public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
-            @Value("${batch.max-jobs:10}") Integer maxJobs
-    ) {
-
-        ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
-        threadPoolExecutor.setMaxPoolSize(maxJobs);
-        threadPoolExecutor.setQueueCapacity(0);
-        threadPoolExecutor.setKeepAliveSeconds(0);
-
-        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> log.info(
-                "Batch Job execution rejected, no available threads."));
-        return threadPoolExecutor;
-    }
+  private final JobBuilderFactory jobBuilderFactory;
 
 
-    @Bean
-    public JobLauncher asyncJobLauncher(
-            JobRepository jobRepository,
-            ThreadPoolTaskExecutor jobLauncherTaskExecutor
-    ) throws Exception {
+  @Bean
+  public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
+          @Value("${batch.max-jobs:10}") Integer maxJobs
+  ) {
 
-        SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
-        simpleJobLauncher.setJobRepository(jobRepository);
+    ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
+    threadPoolExecutor.setMaxPoolSize(maxJobs);
+    threadPoolExecutor.setQueueCapacity(0);
+    threadPoolExecutor.setKeepAliveSeconds(0);
+
+    threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> log.info(
+            "Batch Job execution rejected, no available threads."));
+    return threadPoolExecutor;
+  }
+
+
+  @Bean
+  public JobLauncher asyncJobLauncher(
+          JobRepository jobRepository,
+          ThreadPoolTaskExecutor jobLauncherTaskExecutor
+  ) throws Exception {
+
+    SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
+    simpleJobLauncher.setJobRepository(jobRepository);
     /*simpleJobLauncher.setTaskExecutor(TaskExecutor(
         beanFactory,
         jobLauncherTaskExecutor
     ));*/
-        simpleJobLauncher.afterPropertiesSet();
-        return simpleJobLauncher;
-    }
+    simpleJobLauncher.afterPropertiesSet();
+    return simpleJobLauncher;
+  }
 
 
-    @Bean
-    public Job csvImport(
-            JobBuilderFactory jobBuilderFactory,
-            Flow importCsvFlow,
-            Flow storeCsvDataFlow
-    ) {
+  @Bean
+  public Job csvImport(
+          JobBuilderFactory jobBuilderFactory,
+          Flow importCsvFlow,
+          Flow storeCsvDataFlow
+  ) {
 
-        return jobBuilderFactory.get("csvImport")
-                .incrementer(new RunIdIncrementer())
-                .start(importCsvFlow)
-                .next(storeCsvDataFlow)
-                .end()
-                .build();
-    }
-
-
-    @Bean
-    public Flow importCsvFlow(
-            Step cleanupRepositoryStep,
-            Step importCsvDataStep
-    ) {
-
-        return new FlowBuilder<Flow>("importCsvFlow")
-                .start(cleanupRepositoryStep)
-                .next(importCsvDataStep)
-                .end();
-    }
+    return jobBuilderFactory.get("csvImport")
+            .incrementer(new RunIdIncrementer())
+            .start(importCsvFlow)
+            .next(storeCsvDataFlow)
+            .end()
+            .build();
+  }
 
 
-    @Bean
-    public Step cleanupRepositoryStep(
-            StepBuilderFactory stepBuilderFactory,
-            CleanupRepositoryTasklet cleanupRepositoryTasklet
-    ) {
+  @Bean
+  public Flow importCsvFlow(
+          Step cleanupRepositoryStep,
+          Step importCsvDataStep
+  ) {
 
-        return stepBuilderFactory.get("cleanupRepositoryStep")
-                .tasklet(cleanupRepositoryTasklet)
-                .build();
-    }
+    return new FlowBuilder<Flow>("importCsvFlow")
+            .start(cleanupRepositoryStep)
+            .next(importCsvDataStep)
+            .end();
+  }
 
 
-    @Bean
-    public Step importCsvDataStep(
-            StepBuilderFactory stepBuilderFactory,
-            FlatFileItemReader<com.daninovac.batch.jobs.entity.Job> csvFlatItemReader,
-            //Processor processor,
-            CsvWriter csvWriter
-    ) {
+  @Bean
+  public Step cleanupRepositoryStep(
+          StepBuilderFactory stepBuilderFactory,
+          CleanupRepositoryTasklet cleanupRepositoryTasklet
+  ) {
 
-        return stepBuilderFactory.get("importCsvDataStep")
-                .<com.daninovac.batch.jobs.entity.Job, com.daninovac.batch.jobs.entity.Job>chunk(100)
-                .reader(csvFlatItemReader)
-                //.processor(null)
-                .writer(csvWriter)
-                .build();
-    }
+    return stepBuilderFactory.get("cleanupRepositoryStep")
+            .tasklet(cleanupRepositoryTasklet)
+            .build();
+  }
+
+
+  @Bean
+  public Step importCsvDataStep(
+          StepBuilderFactory stepBuilderFactory,
+          FlatFileItemReader<com.daninovac.batch.jobs.entity.Job> csvFlatItemReader,
+          //Processor processor,
+          CsvWriter csvWriter
+  ) {
+
+    return stepBuilderFactory.get("importCsvDataStep")
+            .<com.daninovac.batch.jobs.entity.Job, com.daninovac.batch.jobs.entity.Job>chunk(100)
+            .reader(csvFlatItemReader)
+            //.processor(null)
+            .writer(csvWriter)
+            .build();
+  }
 
 }

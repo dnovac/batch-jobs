@@ -5,6 +5,7 @@ import com.daninovac.batch.jobs.service.CsvJobService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -20,7 +21,6 @@ import javax.validation.constraints.Size;
 import java.io.IOException;
 
 
-@Data
 @RequiredArgsConstructor
 @Slf4j
 @RestController
@@ -34,7 +34,7 @@ public class CsvJobController {
   public ResponseEntity<Long> triggerImportCsvJob(
           @RequestParam(required = true) @Size(max = 1) String delimiter,
           @RequestParam(required = true) MultipartFile file
-  ) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException {
+  ) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException, JobParametersInvalidException {
 
     log.info("Starting job CSV-Import for file: [{}] bytes and delimiter [{}]", file.getSize(), delimiter);
 

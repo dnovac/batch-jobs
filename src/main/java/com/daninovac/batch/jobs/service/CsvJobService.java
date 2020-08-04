@@ -8,6 +8,8 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
@@ -20,6 +22,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Optional;
 
 
 @Slf4j
@@ -33,17 +36,18 @@ public class CsvJobService {
   private static final String PATH = "path";
   private static final String TIME = "time";
   private static final String FILENAME = "filename";
-
-  private final JobRepository asyncJobLauncher;
+  private static final String DEFAULT_FILENAME = "csv_default";
 
   private final Job csvImport;
+
+  private final JobLauncher jobLauncher;
 
   //private final JobExplorer jobExplorer;
 
   public Long runJobCsvImport(
           String delimiter,
           MultipartFile multipartFile
-  ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+  ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
 
     File file = saveFileInTemporaryFolder(multipartFile);
 
@@ -54,7 +58,7 @@ public class CsvJobService {
             .addLong(TIME, System.currentTimeMillis())
             .toJobParameters();
 
-    JobExecution jobExecution = asyncJobLauncher.createJobExecution(JOB_NAME_IMPORT_CSV, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(csvImport, jobParameters);
 
     return jobExecution.getId();
   }
@@ -69,7 +73,7 @@ public class CsvJobService {
     }
 
     if (tempUploadedFileDirectory.exists()) {
-      final String originalFilename = multipartFile.getOriginalFilename();
+      final String originalFilename = Optional.of(multipartFile.getOriginalFilename()).orElse(DEFAULT_FILENAME);
       File fileToImport = new File(tempUploadedFileDirectory, originalFilename);
 
       try (OutputStream outputStream = new FileOutputStream(fileToImport)) {

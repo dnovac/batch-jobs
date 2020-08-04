@@ -1,7 +1,6 @@
 package com.daninovac.batch.jobs.batch.configuration;
 
 
-import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,20 +16,20 @@ import org.springframework.batch.core.launch.support.SimpleJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 
-@Configuration
 @Slf4j
 @RequiredArgsConstructor
+@Configuration
 public class BatchConfiguration {
 
-  private final BeanFactory beanFactory;
-
   private final JobBuilderFactory jobBuilderFactory;
+  private final StepBuilderFactory stepBuilderFactory;
 
 
   @Bean
@@ -43,13 +42,14 @@ public class BatchConfiguration {
     threadPoolExecutor.setQueueCapacity(0);
     threadPoolExecutor.setKeepAliveSeconds(0);
 
-    threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> log.info(
-            "Batch Job execution rejected, no available threads."));
+    threadPoolExecutor.setRejectedExecutionHandler((r, executor) ->
+            log.info("No available threads for Batch Job")
+    );
     return threadPoolExecutor;
   }
 
 
-  @Bean
+  /*@Bean
   public JobLauncher asyncJobLauncher(
           JobRepository jobRepository,
           ThreadPoolTaskExecutor jobLauncherTaskExecutor
@@ -57,18 +57,17 @@ public class BatchConfiguration {
 
     SimpleJobLauncher simpleJobLauncher = new SimpleJobLauncher();
     simpleJobLauncher.setJobRepository(jobRepository);
-    /*simpleJobLauncher.setTaskExecutor(TaskExecutor(
+    *//*simpleJobLauncher.setTaskExecutor(TaskExecutor(
         beanFactory,
         jobLauncherTaskExecutor
-    ));*/
+    ));*//*
     simpleJobLauncher.afterPropertiesSet();
     return simpleJobLauncher;
-  }
+  }*/
 
 
   @Bean
   public Job csvImport(
-          JobBuilderFactory jobBuilderFactory,
           Flow importCsvFlow,
           Flow storeCsvDataFlow
   ) {
@@ -89,27 +88,14 @@ public class BatchConfiguration {
   ) {
 
     return new FlowBuilder<Flow>("importCsvFlow")
-            .start(cleanupRepositoryStep)
-            .next(importCsvDataStep)
+            //.start(cleanupRepositoryStep)
+            .start(importCsvDataStep)
+            //.next(importCsvDataStep)
             .end();
   }
 
-
-  @Bean
-  public Step cleanupRepositoryStep(
-          StepBuilderFactory stepBuilderFactory,
-          CleanupRepositoryTasklet cleanupRepositoryTasklet
-  ) {
-
-    return stepBuilderFactory.get("cleanupRepositoryStep")
-            .tasklet(cleanupRepositoryTasklet)
-            .build();
-  }
-
-
   @Bean
   public Step importCsvDataStep(
-          StepBuilderFactory stepBuilderFactory,
           FlatFileItemReader<com.daninovac.batch.jobs.entity.Job> csvFlatItemReader,
           //Processor processor,
           CsvWriter csvWriter
@@ -122,5 +108,19 @@ public class BatchConfiguration {
             .writer(csvWriter)
             .build();
   }
+
+
+  /*@Bean
+  public Step cleanupRepositoryStep(
+          StepBuilderFactory stepBuilderFactory,
+          CleanupRepositoryTasklet cleanupRepositoryTasklet
+  ) {
+
+    return stepBuilderFactory.get("cleanupRepositoryStep")
+            .tasklet(cleanupRepositoryTasklet)
+            .build();
+  }*/
+
+
 
 }

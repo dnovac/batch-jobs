@@ -17,8 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CleanupRepositoryTasklet implements Tasklet {
 
-  private BatchJobRepository batchJobRepository;
-
+  private final BatchJobRepository batchJobRepository;
 
   @Override
   public RepeatStatus execute (

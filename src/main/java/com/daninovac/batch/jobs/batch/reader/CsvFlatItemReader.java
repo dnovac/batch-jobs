@@ -24,8 +24,6 @@ public class CsvFlatItemReader extends FlatFileItemReader<Job> {
 
     private String[] headers;
 
-    private int lineIndex = 0;
-
 
     public CsvFlatItemReader(
             @Value("#{jobParameters['path']}") String pathToFile,

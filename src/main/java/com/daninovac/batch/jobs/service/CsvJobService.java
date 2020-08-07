@@ -12,7 +12,6 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,14 +30,14 @@ import java.util.Optional;
 public class CsvJobService {
 
   private static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
-  private static final String JOB_NAME_IMPORT_CSV = "csvImport";
+  private static final String JOB_NAME_IMPORT_CSV = "job";
   private static final String DELIMITER = "delimiter";
   private static final String PATH = "path";
   private static final String TIME = "time";
   private static final String FILENAME = "filename";
   private static final String DEFAULT_FILENAME = "csv_default";
 
-  private final Job csvImport;
+  private final Job job;
 
   private final JobLauncher jobLauncher;
 
@@ -54,11 +53,11 @@ public class CsvJobService {
     JobParameters jobParameters = new JobParametersBuilder()
             .addString(PATH, file.getAbsolutePath())
             .addString(DELIMITER, delimiter)
-            .addString(FILENAME, multipartFile.getName())
+            .addString(FILENAME, Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(DEFAULT_FILENAME))
             .addLong(TIME, System.currentTimeMillis())
             .toJobParameters();
 
-    JobExecution jobExecution = jobLauncher.run(csvImport, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(job, jobParameters);
 
     return jobExecution.getId();
   }
@@ -73,7 +72,7 @@ public class CsvJobService {
     }
 
     if (tempUploadedFileDirectory.exists()) {
-      final String originalFilename = Optional.of(multipartFile.getOriginalFilename()).orElse(DEFAULT_FILENAME);
+      final String originalFilename = Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(DEFAULT_FILENAME);
       File fileToImport = new File(tempUploadedFileDirectory, originalFilename);
 
       try (OutputStream outputStream = new FileOutputStream(fileToImport)) {

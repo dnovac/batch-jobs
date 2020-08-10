@@ -3,7 +3,9 @@ package com.daninovac.batch.jobs.entity;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -19,8 +21,13 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Setter
+@Getter
 @TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
-public class ImportData {
+public class FileData {
+
+  //todo add another table with the filenames and make it PK
+  //todo maybe add format as field and have tables based on format
 
   @Id
   @GeneratedValue

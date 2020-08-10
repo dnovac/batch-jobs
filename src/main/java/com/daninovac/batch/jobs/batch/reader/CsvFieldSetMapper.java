@@ -1,6 +1,6 @@
 package com.daninovac.batch.jobs.batch.reader;
 
-import com.daninovac.batch.jobs.entity.ImportData;
+import com.daninovac.batch.jobs.entity.FileData;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @NoArgsConstructor
-public class JobFieldSetMapper implements FieldSetMapper<ImportData> {
+public class CsvFieldSetMapper implements FieldSetMapper<FileData> {
 
   @Override
-  public ImportData mapFieldSet(FieldSet fieldSet) throws BindException {
+  public FileData mapFieldSet(FieldSet fieldSet) throws BindException {
 
     List<String> columnNames = Arrays.asList(fieldSet.getNames());
     ConcurrentMap<String, String> columnProperties = columnNames.parallelStream()
@@ -27,10 +27,10 @@ public class JobFieldSetMapper implements FieldSetMapper<ImportData> {
                     (prop1, prop2) -> prop1
             ));
 
-    ImportData importData = new ImportData();
-    importData.setProperties(columnProperties);
+    FileData fileData = new FileData();
+    fileData.setProperties(columnProperties);
 
-    return importData;
+    return fileData;
   }
 
 }

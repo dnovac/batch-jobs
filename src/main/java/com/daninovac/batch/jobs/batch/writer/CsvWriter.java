@@ -1,8 +1,8 @@
 package com.daninovac.batch.jobs.batch.writer;
 
 
-import com.daninovac.batch.jobs.entity.ImportData;
-import com.daninovac.batch.jobs.repository.BatchJobRepository;
+import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.repository.DataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -19,19 +19,19 @@ import java.util.List;
 @StepScope
 @Component
 @RequiredArgsConstructor
-public class CsvWriter implements ItemWriter<ImportData> {
+public class CsvWriter implements ItemWriter<FileData> {
 
-  private final BatchJobRepository batchJobRepository;
+  private final DataRepository dataRepository;
 
   private String filename = "defaultFilename";
 
   @Override
-  public void write(List<? extends ImportData> list) throws Exception {
+  public void write(List<? extends FileData> list) throws Exception {
 
     log.info("Step write executed! Writing values in database");
     list.forEach(job -> job.setFilename(filename));
 
-    batchJobRepository.saveAll(list);
+    dataRepository.saveAll(list);
   }
 
   @BeforeStep

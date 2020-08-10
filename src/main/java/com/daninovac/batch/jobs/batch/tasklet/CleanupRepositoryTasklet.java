@@ -1,7 +1,7 @@
 package com.daninovac.batch.jobs.batch.tasklet;
 
 
-import com.daninovac.batch.jobs.repository.BatchJobRepository;
+import com.daninovac.batch.jobs.repository.DataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CleanupRepositoryTasklet implements Tasklet {
 
-  private final BatchJobRepository batchJobRepository;
+  private final DataRepository dataRepository;
 
   @Override
   public RepeatStatus execute(
@@ -29,9 +29,9 @@ public class CleanupRepositoryTasklet implements Tasklet {
             .getJobParameters();
     String filename = jobParameters.getString("filename");
 
-    if (batchJobRepository.findByFilename(filename).size() > 0) {
+    if (dataRepository.findByFilename(filename).size() > 0) {
       log.warn("The filename: {} has been found already in the database. Old related data will be deleted!", filename);
-      batchJobRepository.deleteByFilename(filename);
+      dataRepository.deleteByFilename(filename);
     }
     log.info("Cleaning up database step executed");
 

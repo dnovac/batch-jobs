@@ -3,7 +3,7 @@ package com.daninovac.batch.jobs.batch.configuration;
 
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
-import com.daninovac.batch.jobs.entity.ImportData;
+import com.daninovac.batch.jobs.entity.FileData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -78,12 +78,12 @@ public class BatchConfiguration {
 
   @Bean
   public Step importCsvDataStep(
-          FlatFileItemReader<ImportData> csvFlatItemReader,
+          FlatFileItemReader<FileData> csvFlatItemReader,
           CsvWriter csvWriter
   ) {
 
     return stepBuilderFactory.get("importCsvDataStep")
-            .<ImportData, ImportData>chunk(100)
+            .<FileData, FileData>chunk(100)
             .reader(csvFlatItemReader)
             .writer(csvWriter)
             .build();

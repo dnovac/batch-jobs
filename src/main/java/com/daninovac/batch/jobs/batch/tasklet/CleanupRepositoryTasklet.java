@@ -20,19 +20,22 @@ public class CleanupRepositoryTasklet implements Tasklet {
   private final BatchJobRepository batchJobRepository;
 
   @Override
-  public RepeatStatus execute (
-      StepContribution stepContribution, ChunkContext chunkContext
+  public RepeatStatus execute(
+          StepContribution stepContribution, ChunkContext chunkContext
   ) throws Exception {
 
     final JobParameters jobParameters = chunkContext.getStepContext()
-        .getStepExecution()
-        .getJobParameters();
+            .getStepExecution()
+            .getJobParameters();
+    String filename = jobParameters.getString("filename");
 
-    log.info("Cleaning up database step executed!");
-
-    //todo change repo and method
-    batchJobRepository.deleteById(1L);
+    if (batchJobRepository.findByFilename(filename).size() > 0) {
+      log.warn("The filename: {} has been found already in the database. Old related data will be deleted!", filename);
+      batchJobRepository.deleteByFilename(filename);
+    }
+    log.info("Cleaning up database step executed");
 
     return RepeatStatus.FINISHED;
   }
+
 }

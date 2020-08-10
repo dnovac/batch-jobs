@@ -1,7 +1,7 @@
 package com.daninovac.batch.jobs.batch.reader;
 
 
-import com.daninovac.batch.jobs.entity.Job;
+import com.daninovac.batch.jobs.entity.ImportData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 @StepScope
 @Slf4j
-public class CsvFlatItemReader extends FlatFileItemReader<Job> {
+public class CsvFlatItemReader extends FlatFileItemReader<ImportData> {
 
   public CsvFlatItemReader(
           @Value("#{jobParameters['path']}") String pathToFile,
@@ -28,7 +28,7 @@ public class CsvFlatItemReader extends FlatFileItemReader<Job> {
 
     super();
 
-    LineMapper<Job> lineMapper = createLineMapper(delimiter);
+    LineMapper<ImportData> lineMapper = createLineMapper(delimiter);
 
     this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
     this.setResource(new FileSystemResource(pathToFile));
@@ -36,14 +36,14 @@ public class CsvFlatItemReader extends FlatFileItemReader<Job> {
     this.setLineMapper(lineMapper);
   }
 
-  private LineMapper<Job> createLineMapper(String delimiter) {
+  private LineMapper<ImportData> createLineMapper(String delimiter) {
 
-    DefaultLineMapper<Job> lineMapper = new DefaultLineMapper<>();
+    DefaultLineMapper<ImportData> lineMapper = new DefaultLineMapper<>();
 
     DelimitedLineTokenizer lineTokenizer = createLineTokenizer(delimiter);
     lineMapper.setLineTokenizer(lineTokenizer);
 
-    FieldSetMapper<Job> dataMapper = createDataMapper();
+    FieldSetMapper<ImportData> dataMapper = new JobFieldSetMapper();
     lineMapper.setFieldSetMapper(dataMapper);
 
     return lineMapper;
@@ -61,11 +61,11 @@ public class CsvFlatItemReader extends FlatFileItemReader<Job> {
     return lineTokenizer;
   }
 
-  private FieldSetMapper<Job> createDataMapper() {
+  private FieldSetMapper<ImportData> createDataMapper() {
 
-    BeanWrapperFieldSetMapper<Job> dataMapper =
+    BeanWrapperFieldSetMapper<ImportData> dataMapper =
             new BeanWrapperFieldSetMapper<>();
-    dataMapper.setTargetType(Job.class);
+    dataMapper.setTargetType(ImportData.class);
 
     return dataMapper;
   }
@@ -78,7 +78,10 @@ public class CsvFlatItemReader extends FlatFileItemReader<Job> {
    */
   private void setDynamicHeaders(String delimiter, DelimitedLineTokenizer lineTokenizer) {
 
-    this.setSkippedLinesCallback(skippedLine -> lineTokenizer.setNames(skippedLine.split(delimiter)));
+    String[] columnNames = new String[1000];
+    this.setSkippedLinesCallback(skippedLine -> {
+      lineTokenizer.setNames(skippedLine.split(delimiter));
+    });
   }
 
 }

@@ -20,13 +20,11 @@ import java.util.Map;
 @NoArgsConstructor
 @Data
 @TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
-public class Job {
+public class ImportData {
 
   @Id
   @GeneratedValue
   private Long id;
-
-  private String name;
 
   private String filename;
 

@@ -1,7 +1,7 @@
 package com.daninovac.batch.jobs.batch.writer;
 
 
-import com.daninovac.batch.jobs.entity.Job;
+import com.daninovac.batch.jobs.entity.ImportData;
 import com.daninovac.batch.jobs.repository.BatchJobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,14 +19,14 @@ import java.util.List;
 @StepScope
 @Component
 @RequiredArgsConstructor
-public class CsvWriter implements ItemWriter<Job> {
+public class CsvWriter implements ItemWriter<ImportData> {
 
   private final BatchJobRepository batchJobRepository;
 
   private String filename = "defaultFilename";
 
   @Override
-  public void write (List<? extends Job> list) throws Exception {
+  public void write(List<? extends ImportData> list) throws Exception {
 
     log.info("Step write executed! Writing values in database");
     list.forEach(job -> job.setFilename(filename));

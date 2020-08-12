@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
-import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.mapping.FieldSetMapper;
 import org.springframework.batch.item.file.separator.DefaultRecordSeparatorPolicy;
@@ -28,7 +27,7 @@ public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
 
     super();
 
-    LineMapper<FileData> lineMapper = createLineMapper(delimiter);
+    LineMapper<FileData> lineMapper = buildLineMapper(delimiter);
 
     this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
     this.setResource(new FileSystemResource(pathToFile));
@@ -36,11 +35,11 @@ public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
     this.setLineMapper(lineMapper);
   }
 
-  private LineMapper<FileData> createLineMapper(String delimiter) {
+  private LineMapper<FileData> buildLineMapper(String delimiter) {
 
     DefaultLineMapper<FileData> lineMapper = new DefaultLineMapper<>();
 
-    DelimitedLineTokenizer lineTokenizer = createLineTokenizer(delimiter);
+    DelimitedLineTokenizer lineTokenizer = buildLineTokenizer(delimiter);
     lineMapper.setLineTokenizer(lineTokenizer);
 
     FieldSetMapper<FileData> dataMapper = new CsvFieldSetMapper();
@@ -50,7 +49,7 @@ public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
   }
 
 
-  private DelimitedLineTokenizer createLineTokenizer(String delimiter) {
+  private DelimitedLineTokenizer buildLineTokenizer(String delimiter) {
 
     DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
     lineTokenizer.setDelimiter(delimiter);
@@ -61,14 +60,6 @@ public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
     return lineTokenizer;
   }
 
-  private FieldSetMapper<FileData> createDataMapper() {
-
-    BeanWrapperFieldSetMapper<FileData> dataMapper =
-            new BeanWrapperFieldSetMapper<>();
-    dataMapper.setTargetType(FileData.class);
-
-    return dataMapper;
-  }
 
   /**
    * dynamic way of fetching headers of the csv document

@@ -5,12 +5,15 @@ import com.daninovac.batch.jobs.service.CsvJobService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,6 +44,12 @@ public class CsvJobController {
     Long jobId = csvJobService.runJobCsvImport(delimiter, file);
 
     return ResponseEntity.accepted().body(jobId);
+  }
+
+  @GetMapping("/status/{id}")
+  public BatchStatus getJobStatus(@PathVariable("id") Long jobId) {
+
+    return csvJobService.getJobStatus(jobId);
   }
 
 

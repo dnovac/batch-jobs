@@ -1,6 +1,8 @@
 package com.daninovac.batch.jobs.service;
 
 
+import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.repository.DataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -23,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -44,6 +47,8 @@ public class CsvJobService {
   private final JobLauncher jobLauncher;
 
   private final JobExplorer jobExplorer;
+
+  private final DataRepository dataRepository;
 
   public Long runJobCsvImport(
           String delimiter,
@@ -101,6 +106,11 @@ public class CsvJobService {
     }
     log.warn("Job with id {} does not exist", id);
     return null;
+  }
+
+  public List<FileData> findAllByFilename(String filename) {
+
+    return dataRepository.findByFilename(filename);
   }
 
 }

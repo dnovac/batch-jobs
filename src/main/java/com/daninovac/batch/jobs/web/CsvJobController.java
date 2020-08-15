@@ -1,8 +1,8 @@
 package com.daninovac.batch.jobs.web;
 
 
+import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.service.CsvJobService;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Size;
 import java.io.IOException;
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -44,6 +45,12 @@ public class CsvJobController {
     Long jobId = csvJobService.runJobCsvImport(delimiter, file);
 
     return ResponseEntity.accepted().body(jobId);
+  }
+
+  @GetMapping("find/{filename}")
+  public List<FileData> findByFilename(@PathVariable String filename) {
+
+    return csvJobService.findAllByFilename(filename);
   }
 
   @GetMapping("/status/{id}")

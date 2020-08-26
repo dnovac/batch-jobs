@@ -34,7 +34,7 @@ public class CsvJobController {
   private final CsvJobService csvJobService;
 
 
-  @PostMapping(value = "import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Long> triggerImportCsvJob(
           @RequestParam(required = true) @Size(max = 1) String delimiter,
           @RequestParam(required = true) MultipartFile file
@@ -47,7 +47,7 @@ public class CsvJobController {
     return ResponseEntity.accepted().body(jobId);
   }
 
-  @GetMapping("find/{filename}")
+  @GetMapping("/find/{filename}")
   public List<FileData> findByFilename(@PathVariable String filename) {
 
     return csvJobService.findAllByFilename(filename);

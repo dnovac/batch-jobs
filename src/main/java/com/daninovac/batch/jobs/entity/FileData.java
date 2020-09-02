@@ -33,7 +33,7 @@ public class FileData {
 
   private String filename;
 
-  private FileTypeEnum type;
+  private String type;
 
   @Type(type = "hstore")
   @Column(columnDefinition = "hstore")

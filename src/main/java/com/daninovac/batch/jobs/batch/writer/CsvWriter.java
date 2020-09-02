@@ -35,7 +35,7 @@ public class CsvWriter implements ItemWriter<FileData> {
     log.info("Step write executed! Writing values in database");
     list.forEach(job -> {
       job.setFilename(filename);
-      job.setType(filetype);
+      job.setType(filetype.name());
     });
 
     dataRepository.saveAll(list);

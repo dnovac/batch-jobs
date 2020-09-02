@@ -111,6 +111,11 @@ public class CsvJobService {
     return dataRepository.findByFilename(filename);
   }
 
+  /**
+   * Extracts the extension from the file name
+   * @param filename
+   * @return one of the types of extensions from FileTypeEnum
+   */
   public FileTypeEnum getFileExtension(String filename) {
 
     String fileExtension = Files.getFileExtension(filename);
@@ -120,7 +125,7 @@ public class CsvJobService {
       throw new NoSuchElementException(); //todo create new custom exc
     }
 
-    return FileTypeEnum.valueOf(fileExtension.toUpperCase());
+    return FileTypeEnum.valueOfExtension(fileExtension);
   }
 
   private String getFilename(MultipartFile multipartFile) {

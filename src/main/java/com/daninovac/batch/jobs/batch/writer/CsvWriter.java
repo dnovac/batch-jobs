@@ -3,6 +3,8 @@ package com.daninovac.batch.jobs.batch.writer;
 
 import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.repository.DataRepository;
+import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -23,20 +25,28 @@ public class CsvWriter implements ItemWriter<FileData> {
 
   private final DataRepository dataRepository;
 
-  private String filename = "defaultFilename";
+  private String filename;
+
+  private FileTypeEnum filetype;
 
   @Override
   public void write(List<? extends FileData> list) throws Exception {
 
     log.info("Step write executed! Writing values in database");
-    list.forEach(job -> job.setFilename(filename));
+    list.forEach(job -> {
+      job.setFilename(filename);
+      job.setType(filetype);
+    });
 
     dataRepository.saveAll(list);
   }
 
   @BeforeStep
   public void beforeStep(final StepExecution stepExecution) {
+
     JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
-    this.filename = parameters.getString("filename");
+    this.filename = parameters.getString(Constants.FILENAME);
+    this.filetype = FileTypeEnum.valueOf(parameters.getString(Constants.TYPE));
   }
+
 }

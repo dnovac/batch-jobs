@@ -3,6 +3,9 @@ package com.daninovac.batch.jobs.service;
 
 import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.repository.DataRepository;
+import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -26,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 
@@ -33,14 +37,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class CsvJobService {
-
-  private static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
-  private static final String JOB_NAME_IMPORT_CSV = "job";
-  private static final String DELIMITER = "delimiter";
-  private static final String PATH = "path";
-  private static final String TIME = "time";
-  private static final String FILENAME = "filename";
-  private static final String DEFAULT_FILENAME = "csv_default";
 
   private final Job job;
 
@@ -57,11 +53,13 @@ public class CsvJobService {
 
     File file = saveFileInTemporaryFolder(multipartFile);
 
+    String filename = getFilename(multipartFile);
     JobParameters jobParameters = new JobParametersBuilder()
-            .addString(PATH, file.getAbsolutePath())
-            .addString(DELIMITER, delimiter)
-            .addString(FILENAME, Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(DEFAULT_FILENAME))
-            .addLong(TIME, System.currentTimeMillis())
+            .addString(Constants.PATH, file.getAbsolutePath())
+            .addString(Constants.DELIMITER, delimiter)
+            .addString(Constants.FILENAME, filename)
+            .addString(Constants.TYPE, getFileExtension(filename).name())
+            .addLong(Constants.TIME, System.currentTimeMillis())
             .toJobParameters();
 
     JobExecution jobExecution = jobLauncher.run(job, jobParameters);
@@ -72,14 +70,14 @@ public class CsvJobService {
 
   private File saveFileInTemporaryFolder(MultipartFile multipartFile) throws IOException {
 
-    File tempUploadedFileDirectory = new File(TEMP_DIRECTORY, "jobs");
+    File tempUploadedFileDirectory = new File(Constants.TEMP_DIRECTORY, "jobs");
 
     if (!tempUploadedFileDirectory.exists()) {
       tempUploadedFileDirectory.mkdir();
     }
 
     if (tempUploadedFileDirectory.exists()) {
-      final String originalFilename = Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(DEFAULT_FILENAME);
+      final String originalFilename = getFilename(multipartFile);
       File fileToImport = new File(tempUploadedFileDirectory, originalFilename);
 
       try (OutputStream outputStream = new FileOutputStream(fileToImport)) {
@@ -95,7 +93,7 @@ public class CsvJobService {
   /**
    * Fetch batch job status based on job id
    *
-   * @param id
+   * @param id of the job
    * @return Batch Status [COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;]
    */
   public BatchStatus getJobStatus(Long id) {
@@ -111,6 +109,23 @@ public class CsvJobService {
   public List<FileData> findAllByFilename(String filename) {
 
     return dataRepository.findByFilename(filename);
+  }
+
+  public FileTypeEnum getFileExtension(String filename) {
+
+    String fileExtension = Files.getFileExtension(filename);
+
+    if (fileExtension.isEmpty()) {
+      log.error("File has no extension!");
+      throw new NoSuchElementException(); //todo create new custom exc
+    }
+
+    return FileTypeEnum.valueOf(fileExtension.toUpperCase());
+  }
+
+  private String getFilename(MultipartFile multipartFile) {
+
+    return Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(Constants.DEFAULT_FILENAME);
   }
 
 }

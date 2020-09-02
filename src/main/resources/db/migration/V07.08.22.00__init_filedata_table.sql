@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS file_data
 (
     id         SERIAL PRIMARY KEY,
     filename   varchar(255),
+    type       varchar(8),
     properties hstore
 )

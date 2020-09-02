@@ -1,5 +1,6 @@
 package com.daninovac.batch.jobs.entity;
 
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,19 +23,17 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Setter
-@Getter
 @TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
 public class FileData {
 
-  //todo add another table with the filenames and make it PK
-  //todo maybe add format as field and have tables based on format
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.AUTO)
   private Long id;
 
   private String filename;
+
+  private FileTypeEnum type;
 
   @Type(type = "hstore")
   @Column(columnDefinition = "hstore")

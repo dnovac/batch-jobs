@@ -2,6 +2,7 @@ package com.daninovac.batch.jobs.service;
 
 
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.repository.DataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
@@ -29,8 +30,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import static com.daninovac.batch.jobs.web.dto.FileTypeEnum.getNames;
 
 
 @Slf4j
@@ -49,7 +51,8 @@ public class CsvJobService {
   public Long runJobCsvImport(
           String delimiter,
           MultipartFile multipartFile
-  ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, JobParametersInvalidException {
+  ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+          JobParametersInvalidException, InvalidFileExtensionException {
 
     File file = saveFileInTemporaryFolder(multipartFile);
 
@@ -113,21 +116,35 @@ public class CsvJobService {
 
   /**
    * Extracts the extension from the file name
+   *
    * @param filename
    * @return one of the types of extensions from FileTypeEnum
+   * @throws InvalidFileExtensionException exception
    */
-  public FileTypeEnum getFileExtension(String filename) {
+  public FileTypeEnum getFileExtension(String filename) throws InvalidFileExtensionException {
 
     String fileExtension = Files.getFileExtension(filename);
 
     if (fileExtension.isEmpty()) {
-      log.error("File has no extension!");
-      throw new NoSuchElementException(); //todo create new custom exc
+      log.error("File missing extension!");
+      throw new InvalidFileExtensionException("No extension was provided for the file!");
     }
 
-    return FileTypeEnum.valueOfExtension(fileExtension);
+    try {
+      FileTypeEnum.valueOf(fileExtension);
+      return FileTypeEnum.valueOfExtension(fileExtension);
+    } catch (IllegalArgumentException exception) {
+      log.error("File extension not supported!");
+      String validExtensions = String.join(", ", getNames(FileTypeEnum.class));
+      String errorMessage = "File extension is empty or has invalid extension. Accepted extensions are: " + validExtensions;
+      throw new InvalidFileExtensionException(errorMessage, exception);
+    }
   }
 
+  /**
+   * @param multipartFile uploaded file
+   * @return filename with extension attached
+   */
   private String getFilename(MultipartFile multipartFile) {
 
     return Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(Constants.DEFAULT_FILENAME);

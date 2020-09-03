@@ -2,6 +2,7 @@ package com.daninovac.batch.jobs.web;
 
 
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.CsvJobService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,9 +37,10 @@ public class CsvJobController {
 
   @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Long> triggerImportCsvJob(
-          @RequestParam(required = true) @Size(max = 1) String delimiter,
-          @RequestParam(required = true) MultipartFile file
-  ) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException, JobParametersInvalidException {
+          @RequestParam @Size(max = 1) String delimiter,
+          @RequestParam MultipartFile file
+  ) throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+          IOException, JobParametersInvalidException, InvalidFileExtensionException {
 
     log.info("Starting job CSV-Import for file: [{}] bytes and delimiter [{}]", file.getSize(), delimiter);
 

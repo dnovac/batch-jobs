@@ -4,6 +4,7 @@ import com.daninovac.batch.jobs.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +31,11 @@ public enum FileTypeEnum {
   }
 
   public static FileTypeEnum valueOfExtension(String extension) {
-      return BY_EXTENSION.get(extension);
+
+    return BY_EXTENSION.get(extension);
+  }
+
+  public static String[] getNames(Class<? extends Enum<?>> e) {
+    return Arrays.stream(e.getEnumConstants()).map(Enum::name).toArray(String[]::new);
   }
 }

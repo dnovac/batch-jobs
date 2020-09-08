@@ -1,9 +1,9 @@
 package com.daninovac.batch.jobs.web;
 
 
-import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.CsvJobService;
+import com.daninovac.batch.jobs.web.dto.DataDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.BatchStatus;
@@ -50,9 +50,15 @@ public class CsvJobController {
   }
 
   @GetMapping("/find/{filename}")
-  public List<FileData> findByFilename(@PathVariable String filename) {
+  public List<DataDTO> findByFilename(@PathVariable String filename) {
 
     return csvJobService.findAllByFilename(filename);
+  }
+
+  @GetMapping("/find-by-type")
+  public List<DataDTO> findByFileType() {
+
+    return csvJobService.findAllByTypeCSV();
   }
 
   @GetMapping("/status/{id}")

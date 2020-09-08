@@ -2,7 +2,7 @@ package com.daninovac.batch.jobs.batch.writer;
 
 
 import com.daninovac.batch.jobs.entity.FileData;
-import com.daninovac.batch.jobs.repository.DataRepository;
+import com.daninovac.batch.jobs.repository.FileDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CsvWriter implements ItemWriter<FileData> {
 
-  private final DataRepository dataRepository;
+  private final FileDataRepository fileDataRepository;
 
   private String filename;
 
@@ -38,7 +38,7 @@ public class CsvWriter implements ItemWriter<FileData> {
       job.setType(filetype.name());
     });
 
-    dataRepository.saveAll(list);
+    fileDataRepository.saveAll(list);
   }
 
   @BeforeStep

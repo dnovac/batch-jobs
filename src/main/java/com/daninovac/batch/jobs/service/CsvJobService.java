@@ -3,8 +3,9 @@ package com.daninovac.batch.jobs.service;
 
 import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
-import com.daninovac.batch.jobs.repository.DataRepository;
+import com.daninovac.batch.jobs.repository.FileDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.web.dto.DataDTO;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import com.google.common.io.Files;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.daninovac.batch.jobs.web.dto.FileTypeEnum.getNames;
 
@@ -46,7 +48,7 @@ public class CsvJobService {
 
   private final JobExplorer jobExplorer;
 
-  private final DataRepository dataRepository;
+  private final FileDataRepository fileDataRepository;
 
   public Long runJobCsvImport(
           String delimiter,
@@ -97,7 +99,7 @@ public class CsvJobService {
    * Fetch batch job status based on job id
    *
    * @param id of the job
-   * @return Batch Status [COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;]
+   * @return Batch Status [COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN]
    */
   public BatchStatus getJobStatus(Long id) {
 
@@ -109,15 +111,43 @@ public class CsvJobService {
     return null;
   }
 
-  public List<FileData> findAllByFilename(String filename) {
+  /**
+   *
+   * @param filename - uploaded file name
+   * @return DataDTO
+   */
+  public List<DataDTO> findAllByFilename(String filename) {
 
-    return dataRepository.findByFilename(filename);
+    List<FileData> dataByFilename = fileDataRepository.findByFilename(filename);
+
+    return dataByFilename.stream()
+            .map(fileData -> DataDTO.builder()
+                    .data(fileData.getProperties())
+                    .type(fileData.getType())
+                    .build())
+            .collect(Collectors.toList());
+  }
+
+  /**
+   *
+   * @return list of data properties
+   */
+  public List<DataDTO> findAllByTypeCSV() {
+
+    List<FileData> dataByType = fileDataRepository.findByType(FileTypeEnum.CSV.name());
+
+    return dataByType.stream()
+            .map(fileData -> DataDTO.builder()
+                    .data(fileData.getProperties())
+                    .filename(fileData.getFilename())
+                    .build())
+            .collect(Collectors.toList());
   }
 
   /**
    * Extracts the extension from the file name
    *
-   * @param filename
+   * @param filename - name of the uploaded file
    * @return one of the types of extensions from FileTypeEnum
    * @throws InvalidFileExtensionException exception
    */
@@ -131,7 +161,7 @@ public class CsvJobService {
     }
 
     try {
-      FileTypeEnum.valueOf(fileExtension);
+      FileTypeEnum.valueOfExtension(fileExtension);
       return FileTypeEnum.valueOfExtension(fileExtension);
     } catch (IllegalArgumentException exception) {
       log.error("File extension not supported!");

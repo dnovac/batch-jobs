@@ -31,6 +31,9 @@ public class BatchConfiguration {
   private final JobBuilderFactory jobBuilderFactory;
   private final StepBuilderFactory stepBuilderFactory;
 
+  @Value("${batch.chunk-size:1000}")
+  private int chunkSize;
+
 
   @Bean
   public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
@@ -83,7 +86,7 @@ public class BatchConfiguration {
   ) {
 
     return stepBuilderFactory.get("importCsvDataStep")
-            .<FileData, FileData>chunk(100)
+            .<FileData, FileData>chunk(chunkSize)
             .reader(csvFlatItemReader)
             .writer(csvWriter)
             .build();

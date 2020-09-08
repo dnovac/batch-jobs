@@ -8,10 +8,12 @@ import java.util.List;
 
 
 @Repository
-public interface DataRepository extends JpaRepository<FileData, Long> {
+public interface FileDataRepository extends JpaRepository<FileData, Long> {
 
   void deleteByFilename(String filename);
 
   List<FileData> findByFilename(String filename);
+
+  List<FileData> findByType(String type);
 
 }

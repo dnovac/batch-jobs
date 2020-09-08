@@ -1,5 +1,7 @@
---######### for postgres > 8.0 versions
+--######### works with postgres > 8.0 versions
 CREATE EXTENSION IF NOT EXISTS hstore;
+
+CREATE SEQUENCE hibernate_sequence START 1;
 
 CREATE TABLE IF NOT EXISTS file_data
 (
@@ -7,4 +9,4 @@ CREATE TABLE IF NOT EXISTS file_data
     filename   varchar(255),
     type       varchar(8),
     properties hstore
-)
+);

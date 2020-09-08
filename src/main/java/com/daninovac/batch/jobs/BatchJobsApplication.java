@@ -19,6 +19,7 @@ public class BatchJobsApplication {
     SpringApplication.run(BatchJobsApplication.class, args);
 
     //todo maybe make it async https://medium.com/@YounessBout/increase-spring-batch-performance-through-async-processing-e96fa5d90bbd
+    //todo add XML and maybe json
   }
 
 }

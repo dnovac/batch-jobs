@@ -112,24 +112,21 @@ public class CsvJobService {
   }
 
   /**
-   *
    * @param filename - uploaded file name
    * @return DataDTO
    */
-  public List<DataDTO> findAllByFilename(String filename) {
+  public List<DataDTO> findAllDataByFilename(String filename) {
 
     List<FileData> dataByFilename = fileDataRepository.findByFilename(filename);
 
     return dataByFilename.stream()
             .map(fileData -> DataDTO.builder()
                     .data(fileData.getProperties())
-                    .type(fileData.getType())
                     .build())
             .collect(Collectors.toList());
   }
 
   /**
-   *
    * @return list of data properties
    */
   public List<DataDTO> findAllByTypeCSV() {

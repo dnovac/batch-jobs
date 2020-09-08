@@ -52,7 +52,7 @@ public class CsvJobController {
   @GetMapping("/find/{filename}")
   public List<DataDTO> findByFilename(@PathVariable String filename) {
 
-    return csvJobService.findAllByFilename(filename);
+    return csvJobService.findAllDataByFilename(filename);
   }
 
   @GetMapping("/find-by-type")

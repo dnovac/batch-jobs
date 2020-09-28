@@ -1,6 +1,8 @@
 package com.daninovac.batch.jobs.batch.configuration;
 
 
+import com.daninovac.batch.jobs.batch.model.Student;
+import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import com.daninovac.batch.jobs.entity.FileData;
@@ -14,10 +16,21 @@ import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.FlatFileItemWriter;
+import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
+import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
+import org.springframework.batch.item.xml.StaxEventItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.oxm.Unmarshaller;
+import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.HashMap;
 
 
 /**
@@ -54,15 +67,14 @@ public class BatchConfiguration {
 
   //****** csv batch configs
   @Bean
+  @Primary
   public Job csvImport(
-          Flow importCsvFlow,
-          Flow storeCsvDataFlow
+          Flow importCsvFlow
   ) {
 
     return jobBuilderFactory.get("csvImport")
             .incrementer(new RunIdIncrementer())
             .start(importCsvFlow)
-            .next(storeCsvDataFlow)
             .end()
             .build();
   }
@@ -106,17 +118,74 @@ public class BatchConfiguration {
   }
 
 
-  //****** xml batch configs
+  //****** XML batch configs
+
+  @Bean
+  public Job xmlToCsvJob(
+          Step convertXmlToCsvStep
+  ) {
+
+    return jobBuilderFactory.get("xmlToCsvJob")
+            .flow(convertXmlToCsvStep)
+            .end()
+            .build();
+  }
+
+  @Bean
+  public Step convertXmlToCsvStep(
+          XmlToCsvProcessor xmlProcessor
+  ) {
+
+    return stepBuilderFactory.get("convertXmlToCsvStep")
+            .<Student, Student>chunk(chunkSize)
+            .reader(reader())
+            .writer(writer())
+            .processor(xmlProcessor)
+            .build();
+  }
+
+
+  @Bean
+  public StaxEventItemReader<Student> reader() {
+
+    StaxEventItemReader<Student> reader = new StaxEventItemReader<>();
+    reader.setResource(new ClassPathResource("student.xml"));
+    reader.setFragmentRootElementName("student");
+    reader.setUnmarshaller(unMarshaller());
+    return reader;
+  }
+
+  @Bean
+  public FlatFileItemWriter<Student> writer() {
+
+    FlatFileItemWriter<Student> writer = new FlatFileItemWriter<>();
+    writer.setResource(new FileSystemResource("csv/student.csv"));
+    writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
+      setDelimiter(",");
+      setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{
+        setNames(new String[]{"rollNo", "name", "department"});
+      }});
+    }});
+    return writer;
+  }
+
+  public Unmarshaller unMarshaller() {
+
+    XStreamMarshaller unMarshal = new XStreamMarshaller();
+    unMarshal.setAliases(new HashMap<String, Class>() {{
+      put("student", Student.class);
+    }});
+    return unMarshal;
+  }
+
   @Bean
   public Job xmlImport(
-          Flow importXmlFlow,
-          Flow storeCsvDataFlow
+          Flow importXmlFlow
   ) {
 
     return jobBuilderFactory.get("xmlImport")
             .incrementer(new RunIdIncrementer())
             .start(importXmlFlow)
-            .next(storeCsvDataFlow)
             .end()
             .build();
   }

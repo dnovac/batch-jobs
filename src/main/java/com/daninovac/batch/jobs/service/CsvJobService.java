@@ -42,7 +42,8 @@ import static com.daninovac.batch.jobs.web.dto.FileTypeEnum.getNames;
 @Service
 public class CsvJobService {
 
-  private final Job job;
+  //@Qualifier("csvImport")
+  private final Job csvImportJob;
 
   private final JobLauncher jobLauncher;
 
@@ -67,7 +68,7 @@ public class CsvJobService {
             .addLong(Constants.TIME, System.currentTimeMillis())
             .toJobParameters();
 
-    JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(csvImportJob, jobParameters);
 
     return jobExecution.getId();
   }

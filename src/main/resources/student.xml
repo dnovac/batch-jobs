@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<students>
+    <student>
+        <rollNo>100</rollNo>
+        <name>Walking Techie</name>
+        <department>CS</department>
+    </student>
+    <student>
+        <rollNo>101</rollNo>
+        <name>John Doe</name>
+        <department>CS</department>
+    </student>
+    <student>
+        <rollNo>102</rollNo>
+        <name>Sachin Tendulkar</name>
+        <department>CS</department>
+    </student>
+</students>

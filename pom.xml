@@ -121,6 +121,7 @@
             <version>29.0-jre</version>
         </dependency>
 
+        <!-- XML related -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-oxm</artifactId>

@@ -52,6 +52,7 @@ public class BatchConfiguration {
   }
 
 
+  //****** csv batch configs
   @Bean
   public Job csvImport(
           Flow importCsvFlow,
@@ -101,6 +102,47 @@ public class BatchConfiguration {
 
     return stepBuilderFactory.get("cleanupRepositoryStep")
             .tasklet(cleanupRepositoryTasklet)
+            .build();
+  }
+
+
+  //****** xml batch configs
+  @Bean
+  public Job xmlImport(
+          Flow importXmlFlow,
+          Flow storeCsvDataFlow
+  ) {
+
+    return jobBuilderFactory.get("xmlImport")
+            .incrementer(new RunIdIncrementer())
+            .start(importXmlFlow)
+            .next(storeCsvDataFlow)
+            .end()
+            .build();
+  }
+
+  @Bean
+  public Flow importXmlFlow(
+          Step cleanupRepositoryStep,
+          Step importXmlDataStep
+  ) {
+
+    return new FlowBuilder<Flow>("importXmlFlow")
+            .start(cleanupRepositoryStep)
+            .next(importXmlDataStep)
+            .end();
+  }
+
+  @Bean
+  public Step importXmlDataStep(
+          FlatFileItemReader<FileData> csvFlatItemReader,
+          CsvWriter csvWriter
+  ) {
+
+    return stepBuilderFactory.get("importXmlDataStep")
+            .<FileData, FileData>chunk(chunkSize)
+            .reader(csvFlatItemReader)
+            .writer(csvWriter)
             .build();
   }
 

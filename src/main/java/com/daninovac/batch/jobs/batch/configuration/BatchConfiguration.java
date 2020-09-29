@@ -121,11 +121,11 @@ public class BatchConfiguration {
   //****** XML batch configs
 
   @Bean
-  public Job xmlToCsvJob(
+  public Job xmlImport(
           Step convertXmlToCsvStep
   ) {
 
-    return jobBuilderFactory.get("xmlToCsvJob")
+    return jobBuilderFactory.get("xmpImport")
             .flow(convertXmlToCsvStep)
             .end()
             .build();
@@ -178,7 +178,7 @@ public class BatchConfiguration {
     return unMarshal;
   }
 
-  @Bean
+  /*@Bean
   public Job xmlImport(
           Flow importXmlFlow
   ) {
@@ -213,6 +213,6 @@ public class BatchConfiguration {
             .reader(csvFlatItemReader)
             .writer(csvWriter)
             .build();
-  }
+  }*/
 
 }

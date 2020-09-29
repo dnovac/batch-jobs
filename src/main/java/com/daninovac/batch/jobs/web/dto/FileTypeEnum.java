@@ -1,13 +1,10 @@
 package com.daninovac.batch.jobs.web.dto;
 
-import com.daninovac.batch.jobs.utils.Constants;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 
 /**
@@ -17,8 +14,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public enum FileTypeEnum {
   CSV("csv"),
-  XLS("xls"),
-  XLSX("xlsx");
+  XML("xml"),
+  JSON("json");
 
   private static final Map<String, FileTypeEnum> BY_EXTENSION = new HashMap<>();
 
@@ -36,6 +33,7 @@ public enum FileTypeEnum {
   }
 
   public static String[] getNames(Class<? extends Enum<?>> e) {
+
     return Arrays.stream(e.getEnumConstants()).map(Enum::name).toArray(String[]::new);
   }
 }

@@ -28,9 +28,7 @@ public class FileUtils {
 
     File tempUploadedFileDirectory = new File(Constants.TEMP_DIRECTORY, "jobs");
 
-    if (!tempUploadedFileDirectory.exists()) {
-      tempUploadedFileDirectory.mkdir();
-    }
+    createDirectory(tempUploadedFileDirectory);
 
     if (tempUploadedFileDirectory.exists()) {
       final String originalFilename = getFilename(multipartFile);
@@ -41,9 +39,23 @@ public class FileUtils {
         log.info("Saving csv of size {} in temporary folder", multipartFile.getSize());
         outputStream.flush();
       }
+
       return fileToImport;
     }
     throw new FileNotFoundException();
+  }
+
+  /**
+   * Create directory if not exists
+   *
+   * @param tempUploadedFileDirectory
+   * @implNote on Windows worked without this func, but MacOS needed it
+   */
+  private static void createDirectory(File tempUploadedFileDirectory) {
+
+    if (!tempUploadedFileDirectory.exists()) {
+      tempUploadedFileDirectory.mkdir();
+    }
   }
 
   /**
@@ -72,12 +84,12 @@ public class FileUtils {
     }
 
     try {
-      FileTypeEnum.valueOfExtension(fileExtension);
       return FileTypeEnum.valueOfExtension(fileExtension);
     } catch (IllegalArgumentException exception) {
       log.error("File extension not supported!");
-      String validExtensions = String.join(", ", getNames(FileTypeEnum.class));
-      String errorMessage = "File extension is empty or has invalid extension. Accepted extensions are: " + validExtensions;
+      String errorMessage = String.format(
+              "File extension is empty or has invalid extension. Accepted extensions are: %s ",
+              String.join(", ", getNames(FileTypeEnum.class)));
       throw new InvalidFileExtensionException(errorMessage, exception);
     }
   }

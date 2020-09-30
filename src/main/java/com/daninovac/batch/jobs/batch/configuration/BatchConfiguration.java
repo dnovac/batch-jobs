@@ -1,11 +1,13 @@
 package com.daninovac.batch.jobs.batch.configuration;
 
 
+import com.daninovac.batch.jobs.batch.decider.ImportTypeDecider;
 import com.daninovac.batch.jobs.batch.model.Student;
 import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -83,12 +85,15 @@ public class BatchConfiguration {
   @Bean
   public Flow importCsvFlow(
           Step cleanupRepositoryStep,
-          Step importCsvDataStep
+          Step importCsvDataStep,
+          Step convertXmlToCsvStep
   ) {
 
     return new FlowBuilder<Flow>("importCsvFlow")
             .start(cleanupRepositoryStep)
-            .next(importCsvDataStep)
+            .next(new ImportTypeDecider()).on(FileTypeEnum.CSV.name()).to(importCsvDataStep)
+            .next(new ImportTypeDecider()).on(FileTypeEnum.XML.name()).to(convertXmlToCsvStep)
+            //.next(importCsvDataStep)
             .end();
   }
 
@@ -125,7 +130,7 @@ public class BatchConfiguration {
           Step convertXmlToCsvStep
   ) {
 
-    return jobBuilderFactory.get("xmpImport")
+    return jobBuilderFactory.get("xmlImport")
             .flow(convertXmlToCsvStep)
             .end()
             .build();

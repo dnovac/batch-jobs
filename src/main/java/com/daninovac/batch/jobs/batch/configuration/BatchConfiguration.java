@@ -67,16 +67,20 @@ public class BatchConfiguration {
   }
 
 
-  //****** csv batch configs
   @Bean
   @Primary
-  public Job csvImport(
-          Flow importCsvFlow
+  public Job fileImportJob(
+          ImportTypeDecider fileTypeDecider,
+          Step cleanupRepositoryStep,
+          Flow importCsvFlow,
+          Flow importXmlFlow
   ) {
 
-    return jobBuilderFactory.get("csvImport")
+    return jobBuilderFactory.get("fileImportJob")
             .incrementer(new RunIdIncrementer())
-            .start(importCsvFlow)
+            .start(cleanupRepositoryStep)
+            .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
+            .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
             .end()
             .build();
   }
@@ -84,17 +88,31 @@ public class BatchConfiguration {
 
   @Bean
   public Flow importCsvFlow(
-          Step cleanupRepositoryStep,
-          Step importCsvDataStep,
-          Step convertXmlToCsvStep
+          Step importCsvDataStep
   ) {
 
     return new FlowBuilder<Flow>("importCsvFlow")
-            .start(cleanupRepositoryStep)
-            .next(new ImportTypeDecider()).on(FileTypeEnum.CSV.name()).to(importCsvDataStep)
-            .next(new ImportTypeDecider()).on(FileTypeEnum.XML.name()).to(convertXmlToCsvStep)
-            //.next(importCsvDataStep)
+            .start(importCsvDataStep)
             .end();
+  }
+
+
+  @Bean
+  public Flow importXmlFlow(
+          Step convertXmlToCsvStep,
+          Step importCsvDataStep
+  ) {
+
+    return new FlowBuilder<Flow>("importXmlFlow")
+            .start(convertXmlToCsvStep)
+            .next(importCsvDataStep)
+            .end();
+  }
+
+  @Bean
+  public ImportTypeDecider fileTypeDecider() {
+
+    return new ImportTypeDecider();
   }
 
   @Bean
@@ -123,18 +141,7 @@ public class BatchConfiguration {
   }
 
 
-  //****** XML batch configs
 
-  @Bean
-  public Job xmlImport(
-          Step convertXmlToCsvStep
-  ) {
-
-    return jobBuilderFactory.get("xmlImport")
-            .flow(convertXmlToCsvStep)
-            .end()
-            .build();
-  }
 
   @Bean
   public Step convertXmlToCsvStep(
@@ -182,42 +189,5 @@ public class BatchConfiguration {
     }});
     return unMarshal;
   }
-
-  /*@Bean
-  public Job xmlImport(
-          Flow importXmlFlow
-  ) {
-
-    return jobBuilderFactory.get("xmlImport")
-            .incrementer(new RunIdIncrementer())
-            .start(importXmlFlow)
-            .end()
-            .build();
-  }
-
-  @Bean
-  public Flow importXmlFlow(
-          Step cleanupRepositoryStep,
-          Step importXmlDataStep
-  ) {
-
-    return new FlowBuilder<Flow>("importXmlFlow")
-            .start(cleanupRepositoryStep)
-            .next(importXmlDataStep)
-            .end();
-  }
-
-  @Bean
-  public Step importXmlDataStep(
-          FlatFileItemReader<FileData> csvFlatItemReader,
-          CsvWriter csvWriter
-  ) {
-
-    return stepBuilderFactory.get("importXmlDataStep")
-            .<FileData, FileData>chunk(chunkSize)
-            .reader(csvFlatItemReader)
-            .writer(csvWriter)
-            .build();
-  }*/
 
 }

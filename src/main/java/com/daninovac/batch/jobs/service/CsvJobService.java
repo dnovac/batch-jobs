@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class CsvJobService {
 
   //@Qualifier("csvImport")
-  private final Job csvImportJob;
+  private final Job fileImportJob;
 
   private final JobLauncher jobLauncher;
 
@@ -62,7 +62,7 @@ public class CsvJobService {
             .addLong(Constants.TIME, System.currentTimeMillis())
             .toJobParameters();
 
-    JobExecution jobExecution = jobLauncher.run(csvImportJob, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
 
     return jobExecution.getId();
   }

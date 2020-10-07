@@ -50,8 +50,8 @@ public class CsvJobService {
   ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
           JobParametersInvalidException, InvalidFileExtensionException {
 
-    File file = FileUtils.saveFileInTemporaryFolder(multipartFile);
-    String filename = FileUtils.getFilename(multipartFile);
+    File file = FileUtils.saveFileInTemporaryFolder(multipartFile.getInputStream(), multipartFile.getOriginalFilename());
+    String filename = FileUtils.getFilename(multipartFile.getOriginalFilename());
     String fileExtension = FileUtils.getFileExtension(filename).name();
 
     JobParameters jobParameters = new JobParametersBuilder()

@@ -7,6 +7,7 @@ import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.utils.FileUtils;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,8 @@ import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.xstream.XStreamMarshaller;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 
 
@@ -141,8 +144,6 @@ public class BatchConfiguration {
   }
 
 
-
-
   @Bean
   public Step convertXmlToCsvStep(
           XmlToCsvProcessor xmlProcessor
@@ -171,13 +172,22 @@ public class BatchConfiguration {
   public FlatFileItemWriter<Student> writer() {
 
     FlatFileItemWriter<Student> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("csv/student.csv"));
-    writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
-      setDelimiter(",");
-      setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{
-        setNames(new String[]{"rollNo", "name", "department"});
+    FileSystemResource csvConvertedFile = new FileSystemResource("student.csv");
+
+    try {
+      File savedFile = FileUtils.saveFileInTemporaryFolder(csvConvertedFile.getInputStream(), csvConvertedFile.getFilename());
+      FileSystemResource csvConverted = new FileSystemResource(savedFile);
+      writer.setResource(csvConverted);
+      writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
+        setDelimiter(",");
+        setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{
+          setNames(new String[]{"rollNo", "name", "department"});
+        }});
       }});
-    }});
+    } catch (IOException e) {
+      log.error("Converted XML file cannot be saved into temporary folder!");
+      e.printStackTrace();
+    }
     return writer;
   }
 

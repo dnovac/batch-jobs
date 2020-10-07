@@ -5,8 +5,10 @@ import com.daninovac.batch.jobs.batch.decider.ImportTypeDecider;
 import com.daninovac.batch.jobs.batch.model.Student;
 import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
+import com.daninovac.batch.jobs.batch.tasklet.UpdateJobParamsTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -100,11 +103,13 @@ public class BatchConfiguration {
   @Bean
   public Flow importXmlFlow(
           Step convertXmlToCsvStep,
-          Step importCsvDataStep
+          Step importCsvDataStep,
+          Step updateJobParamsStep
   ) {
 
     return new FlowBuilder<Flow>("importXmlFlow")
             .start(convertXmlToCsvStep)
+            .next(updateJobParamsStep)
             .next(importCsvDataStep)
             .end();
   }
@@ -140,6 +145,17 @@ public class BatchConfiguration {
             .build();
   }
 
+  @Bean
+  public Step updateJobParamsStep(
+          StepBuilderFactory stepBuilderFactory,
+          UpdateJobParamsTasklet updateJobParamsTasklet
+  ) {
+
+    return stepBuilderFactory.get("updateJobParamsStep")
+            .tasklet(updateJobParamsTasklet)
+            .build();
+  }
+
 
   @Bean
   public Step convertXmlToCsvStep(
@@ -169,9 +185,9 @@ public class BatchConfiguration {
   public FlatFileItemWriter<Student> writer() {
 
     FlatFileItemWriter<Student> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("csv/student.csv"));
+    writer.setResource(new FileSystemResource("csv/" + Constants.XML_CONVERTED_FILENAME));
     writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
-      setDelimiter(",");
+      setDelimiter(";");
       setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{
         setNames(new String[]{"rollNo", "name", "department"});
       }});

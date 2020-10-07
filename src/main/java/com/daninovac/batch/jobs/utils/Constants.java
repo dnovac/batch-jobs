@@ -16,6 +16,7 @@ public final class Constants {
   public static final String FILENAME = "filename";
   public static final String DEFAULT_FILENAME = "csv_default";
   public static final String TYPE = "filetype";
+  public static final String XML_CONVERTED_FILENAME="student.csv"; //todo rename better
 
   private Constants() {
   }

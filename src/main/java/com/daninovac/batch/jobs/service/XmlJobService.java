@@ -29,7 +29,7 @@ import static com.daninovac.batch.jobs.utils.FileUtils.*;
 @Service
 public class XmlJobService {
 
-  private final Job xmlImport;
+  private final Job fileImportJob;
 
   private final JobLauncher jobLauncher;
 
@@ -55,7 +55,7 @@ public class XmlJobService {
             .addLong(Constants.TIME, System.currentTimeMillis())
             .toJobParameters();
 
-    JobExecution jobExecution = jobLauncher.run(xmlImport, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
 
     return jobExecution.getId();
   }

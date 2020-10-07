@@ -5,12 +5,12 @@ import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import com.google.common.io.Files;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
 
@@ -24,24 +24,23 @@ public class FileUtils {
 
   }
 
-  public static File saveFileInTemporaryFolder(InputStream fileInputStream, String originalFilename)
-          throws IOException {
+  public static File saveFileInTemporaryFolder(MultipartFile multipartFile) throws IOException {
 
     File tempUploadedFileDirectory = new File(Constants.TEMP_DIRECTORY, "jobs");
 
     createDirectory(tempUploadedFileDirectory);
 
     if (tempUploadedFileDirectory.exists()) {
-      final String filename = getFilename(originalFilename);
-      File savedFile = new File(tempUploadedFileDirectory, filename);
+      final String originalFilename = getFilename(multipartFile);
+      File fileToImport = new File(tempUploadedFileDirectory, originalFilename);
 
-      try (OutputStream outputStream = new FileOutputStream(savedFile)) {
-        IOUtils.copy(fileInputStream, outputStream);
-        log.info("Saving imported file: {} in temporary folder", filename);
+      try (OutputStream outputStream = new FileOutputStream(fileToImport)) {
+        IOUtils.copy(multipartFile.getInputStream(), outputStream);
+        log.info("Saving csv of size {} in temporary folder", multipartFile.getSize());
         outputStream.flush();
       }
 
-      return savedFile;
+      return fileToImport;
     }
     throw new FileNotFoundException();
   }
@@ -60,12 +59,12 @@ public class FileUtils {
   }
 
   /**
-   * @param filename name of the uploaded file
+   * @param multipartFile uploaded file
    * @return filename with extension attached
    */
-  public static String getFilename(String filename) {
+  public static String getFilename(MultipartFile multipartFile) {
 
-    return Optional.ofNullable(filename).orElse(Constants.DEFAULT_FILENAME);
+    return Optional.ofNullable(multipartFile.getOriginalFilename()).orElse(Constants.DEFAULT_FILENAME);
   }
 
   /**

@@ -9,7 +9,6 @@ import java.io.File;
  */
 public final class Constants {
 
-  //C:\Users\dnovac\AppData\Local\Temp\jobs
   public static final File TEMP_DIRECTORY = new File(System.getProperty("java.io.tmpdir"));
   public static final String DELIMITER = "delimiter";
   public static final String PATH = "path";

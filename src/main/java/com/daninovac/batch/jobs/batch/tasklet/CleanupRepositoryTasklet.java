@@ -22,14 +22,14 @@ public class CleanupRepositoryTasklet implements Tasklet {
   @Override
   public RepeatStatus execute(
           StepContribution stepContribution, ChunkContext chunkContext
-  ) {
+  ) throws Exception {
 
     final JobParameters jobParameters = chunkContext.getStepContext()
             .getStepExecution()
             .getJobParameters();
     String filename = jobParameters.getString("filename");
 
-    if (!fileDataRepository.findByFilename(filename).isEmpty()) {
+    if (fileDataRepository.findByFilename(filename).size() > 0) {
       log.warn("The filename: {} has been found already in the database. Old related data will be deleted!", filename);
       fileDataRepository.deleteByFilename(filename);
     }

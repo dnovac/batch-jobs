@@ -19,7 +19,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
@@ -46,162 +45,162 @@ import java.util.HashMap;
 @Configuration
 public class BatchConfiguration {
 
-  private final JobBuilderFactory jobBuilderFactory;
-  private final StepBuilderFactory stepBuilderFactory;
+    private final JobBuilderFactory jobBuilderFactory;
+    private final StepBuilderFactory stepBuilderFactory;
 
-  @Value("${batch.chunk-size:1000}")
-  private int chunkSize;
-
-
-  @Bean
-  public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
-          @Value("${batch.max-jobs:10}") Integer maxJobs
-  ) {
-
-    ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
-    threadPoolExecutor.setMaxPoolSize(maxJobs);
-    threadPoolExecutor.setQueueCapacity(0);
-    threadPoolExecutor.setKeepAliveSeconds(0);
-
-    threadPoolExecutor.setRejectedExecutionHandler((r, executor) ->
-            log.info("No available threads for Batch Job")
-    );
-    return threadPoolExecutor;
-  }
+    @Value("${batch.chunk-size:1000}")
+    private int chunkSize;
 
 
-  @Bean
-  @Primary
-  public Job fileImportJob(
-          ImportTypeDecider fileTypeDecider,
-          Step cleanupRepositoryStep,
-          Flow importCsvFlow,
-          Flow importXmlFlow
-  ) {
+    @Bean
+    public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
+            @Value("${batch.max-jobs:10}") Integer maxJobs
+    ) {
 
-    return jobBuilderFactory.get("fileImportJob")
-            .incrementer(new RunIdIncrementer())
-            .start(cleanupRepositoryStep)
-            .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
-            .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
-            .end()
-            .build();
-  }
+        ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
+        threadPoolExecutor.setMaxPoolSize(maxJobs);
+        threadPoolExecutor.setQueueCapacity(0);
+        threadPoolExecutor.setKeepAliveSeconds(0);
+
+        threadPoolExecutor.setRejectedExecutionHandler((r, executor) ->
+                log.info("No available threads for Batch Job")
+        );
+        return threadPoolExecutor;
+    }
 
 
-  @Bean
-  public Flow importCsvFlow(
-          Step importCsvDataStep
-  ) {
+    @Bean
+    @Primary
+    public Job fileImportJob(
+            ImportTypeDecider fileTypeDecider,
+            Step cleanupRepositoryStep,
+            Flow importCsvFlow,
+            Flow importXmlFlow
+    ) {
 
-    return new FlowBuilder<Flow>("importCsvFlow")
-            .start(importCsvDataStep)
-            .end();
-  }
-
-
-  @Bean
-  public Flow importXmlFlow(
-          Step convertXmlToCsvStep,
-          Step importCsvDataStep,
-          Step updateJobParamsStep
-  ) {
-
-    return new FlowBuilder<Flow>("importXmlFlow")
-            .start(convertXmlToCsvStep)
-            .next(updateJobParamsStep)
-            .next(importCsvDataStep)
-            .end();
-  }
-
-  @Bean
-  public ImportTypeDecider fileTypeDecider() {
-
-    return new ImportTypeDecider();
-  }
-
-  @Bean
-  public Step importCsvDataStep(
-          FlatFileItemReader<FileData> csvFlatItemReader,
-          CsvWriter csvWriter
-  ) {
-
-    return stepBuilderFactory.get("importCsvDataStep")
-            .<FileData, FileData>chunk(chunkSize)
-            .reader(csvFlatItemReader)
-            .writer(csvWriter)
-            .build();
-  }
+        return jobBuilderFactory.get("fileImportJob")
+                .incrementer(new RunIdIncrementer())
+                .start(cleanupRepositoryStep)
+                .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
+                .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
+                .end()
+                .build();
+    }
 
 
-  @Bean
-  public Step cleanupRepositoryStep(
-          StepBuilderFactory stepBuilderFactory,
-          CleanupRepositoryTasklet cleanupRepositoryTasklet
-  ) {
+    @Bean
+    public Flow importCsvFlow(
+            Step importCsvDataStep
+    ) {
 
-    return stepBuilderFactory.get("cleanupRepositoryStep")
-            .tasklet(cleanupRepositoryTasklet)
-            .build();
-  }
-
-  @Bean
-  public Step updateJobParamsStep(
-          StepBuilderFactory stepBuilderFactory,
-          UpdateJobParamsTasklet updateJobParamsTasklet
-  ) {
-
-    return stepBuilderFactory.get("updateJobParamsStep")
-            .tasklet(updateJobParamsTasklet)
-            .build();
-  }
+        return new FlowBuilder<Flow>("importCsvFlow")
+                .start(importCsvDataStep)
+                .end();
+    }
 
 
-  @Bean
-  public Step convertXmlToCsvStep(
-          XmlToCsvProcessor xmlProcessor
-  ) {
+    @Bean
+    public Flow importXmlFlow(
+            Step convertXmlToCsvStep,
+            Step updateJobParamsStep,
+            Step importCsvDataStep
+    ) {
 
-    return stepBuilderFactory.get("convertXmlToCsvStep")
-            .<Student, Student>chunk(chunkSize)
-            .reader(reader())
-            .writer(writer())
-            .processor(xmlProcessor)
-            .build();
-  }
+        return new FlowBuilder<Flow>("importXmlFlow")
+                .start(convertXmlToCsvStep)
+                .next(updateJobParamsStep)
+                .next(importCsvDataStep)
+                .end();
+    }
+
+    @Bean
+    public ImportTypeDecider fileTypeDecider() {
+
+        return new ImportTypeDecider();
+    }
+
+    @Bean
+    public Step importCsvDataStep(
+            FlatFileItemReader<FileData> csvFlatItemReader,
+            CsvWriter csvWriter
+    ) {
+
+        return stepBuilderFactory.get("importCsvDataStep")
+                .<FileData, FileData>chunk(chunkSize)
+                .reader(csvFlatItemReader)
+                .writer(csvWriter)
+                .build();
+    }
 
 
-  @Bean
-  public StaxEventItemReader<Student> reader() {
+    @Bean
+    public Step cleanupRepositoryStep(
+            StepBuilderFactory stepBuilderFactory,
+            CleanupRepositoryTasklet cleanupRepositoryTasklet
+    ) {
 
-    StaxEventItemReader<Student> reader = new StaxEventItemReader<>();
-    reader.setResource(new ClassPathResource("student.xml"));
-    reader.setFragmentRootElementName("student");
-    reader.setUnmarshaller(unMarshaller());
-    return reader;
-  }
+        return stepBuilderFactory.get("cleanupRepositoryStep")
+                .tasklet(cleanupRepositoryTasklet)
+                .build();
+    }
 
-  @Bean
-  public FlatFileItemWriter<Student> writer() {
+    @Bean
+    public Step updateJobParamsStep(
+            StepBuilderFactory stepBuilderFactory,
+            UpdateJobParamsTasklet updateJobParamsTasklet
+    ) {
 
-    FlatFileItemWriter<Student> writer = new FlatFileItemWriter<>();
-    writer.setResource(new FileSystemResource("csv/" + Constants.XML_CONVERTED_FILENAME));
-    writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
-      setDelimiter(";");
-      setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{
-        setNames(new String[]{"rollNo", "name", "department"});
-      }});
-    }});
-    return writer;
-  }
+        return stepBuilderFactory.get("updateJobParamsStep")
+                .tasklet(updateJobParamsTasklet)
+                .build();
+    }
 
-  public Unmarshaller unMarshaller() {
 
-    XStreamMarshaller unMarshal = new XStreamMarshaller();
-    unMarshal.setAliases(new HashMap<String, Class>() {{
-      put("student", Student.class);
-    }});
-    return unMarshal;
-  }
+    @Bean
+    public Step convertXmlToCsvStep(
+            XmlToCsvProcessor xmlProcessor
+    ) {
+
+        return stepBuilderFactory.get("convertXmlToCsvStep")
+                .<Student, Student>chunk(chunkSize)
+                .reader(reader())
+                .writer(writer())
+                .processor(xmlProcessor)
+                .build();
+    }
+
+
+    @Bean
+    public StaxEventItemReader<Student> reader() {
+
+        StaxEventItemReader<Student> reader = new StaxEventItemReader<>();
+        reader.setResource(new ClassPathResource("student.xml"));
+        reader.setFragmentRootElementName("student");
+        reader.setUnmarshaller(unMarshaller());
+        return reader;
+    }
+
+    @Bean
+    public FlatFileItemWriter<Student> writer() {
+
+        FlatFileItemWriter<Student> writer = new FlatFileItemWriter<>();
+        writer.setResource(new FileSystemResource("csv/" + Constants.XML_CONVERTED_FILENAME));
+        writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
+            setDelimiter(";");
+            setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{
+                setNames(new String[]{"rollNo", "name", "department"});
+            }});
+        }});
+        return writer;
+    }
+
+    public Unmarshaller unMarshaller() {
+
+        XStreamMarshaller unMarshal = new XStreamMarshaller();
+        unMarshal.setAliases(new HashMap<String, Class>() {{
+            put("student", Student.class);
+        }});
+        return unMarshal;
+    }
 
 }

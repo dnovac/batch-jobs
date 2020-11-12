@@ -28,7 +28,7 @@ public class UpdateJobParamsTasklet implements Tasklet {
             .getExecutionContext()
             .put(Constants.PATH, Constants.XML_CONVERTED_FILENAME);
 
-    return null;
+    return RepeatStatus.FINISHED;
   }
 
 }

@@ -69,9 +69,7 @@ public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
    */
   private void setDynamicHeaders(String delimiter, DelimitedLineTokenizer lineTokenizer) {
 
-    this.setSkippedLinesCallback(skippedLine -> {
-      lineTokenizer.setNames(skippedLine.split(delimiter));
-    });
+    this.setSkippedLinesCallback(skippedLine -> lineTokenizer.setNames(skippedLine.split(delimiter)));
   }
 
 }

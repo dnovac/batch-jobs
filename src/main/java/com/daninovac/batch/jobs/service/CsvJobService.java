@@ -29,90 +29,99 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.daninovac.batch.jobs.utils.Constants.DIRECTORY_NAME;
+import static com.daninovac.batch.jobs.utils.Constants.TEMP_DIRECTORY;
+
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class CsvJobService {
 
-  //@Qualifier("csvImport")
-  private final Job fileImportJob;
+    //@Qualifier("csvImport")
+    private final Job fileImportJob;
 
-  private final JobLauncher jobLauncher;
+    private final JobLauncher jobLauncher;
 
-  private final JobExplorer jobExplorer;
+    private final JobExplorer jobExplorer;
 
-  private final FileDataRepository fileDataRepository;
+    private final FileDataRepository fileDataRepository;
 
-  public Long runJobCsvImport(
-          String delimiter,
-          MultipartFile multipartFile
-  ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-          JobParametersInvalidException, InvalidFileExtensionException {
+    public Long runJobCsvImport(
+            String delimiter,
+            MultipartFile multipartFile
+    ) throws IOException,
+            JobExecutionAlreadyRunningException,
+            JobRestartException,
+            JobInstanceAlreadyCompleteException,
+            JobParametersInvalidException,
+            InvalidFileExtensionException {
 
-    File file = FileUtils.saveFileInTemporaryFolder(multipartFile);
-    String filename = FileUtils.getFilename(multipartFile);
-    String fileExtension = FileUtils.getFileExtension(filename).name();
+        File jobsTempDirectory = new File(TEMP_DIRECTORY, DIRECTORY_NAME);
+        File file = FileUtils.saveFileInTemporaryFolder(jobsTempDirectory, multipartFile);
+        String filename = FileUtils.getFilename(multipartFile);
+        String fileExtension = FileUtils.getFileExtension(filename).name();
 
-    JobParameters jobParameters = new JobParametersBuilder()
-            .addString(Constants.PATH, file.getAbsolutePath())
-            .addString(Constants.DELIMITER, delimiter)
-            .addString(Constants.FILENAME, filename)
-            .addString(Constants.TYPE, fileExtension)
-            .addLong(Constants.TIME, System.currentTimeMillis())
-            .toJobParameters();
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
+                .addString(Constants.PATH_TO_TEMP_FOLDER, jobsTempDirectory.getAbsolutePath())
+                .addString(Constants.DELIMITER, delimiter)
+                .addString(Constants.FILENAME, filename)
+                .addString(Constants.FILE_EXTENSION, fileExtension)
+                .addLong(Constants.TIME, System.currentTimeMillis())
+                .toJobParameters();
 
-    JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
+        JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
 
-    return jobExecution.getId();
-  }
-
-
-  /**
-   * Fetch batch job status based on job id
-   *
-   * @param id of the job
-   * @return Batch Status [COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN]
-   */
-  public BatchStatus getJobStatus(Long id) {
-
-    JobExecution jobExecution = jobExplorer.getJobExecution(id);
-    if (jobExecution != null) {
-      return jobExecution.getStatus();
+        return jobExecution.getId();
     }
-    log.warn("Job with id {} does not exist", id);
-    return null;
-  }
 
-  /**
-   * @param filename - uploaded file name
-   * @return DataDTO
-   */
-  public List<DataDTO> findAllDataByFilename(String filename) {
 
-    List<FileData> dataByFilename = fileDataRepository.findByFilename(filename);
+    /**
+     * Fetch batch job status based on job id
+     *
+     * @param id of the job
+     * @return Batch Status [COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN]
+     */
+    public BatchStatus getJobStatus(Long id) {
 
-    return dataByFilename.stream()
-            .map(fileData -> DataDTO.builder()
-                    .data(fileData.getProperties())
-                    .build())
-            .collect(Collectors.toList());
-  }
+        JobExecution jobExecution = jobExplorer.getJobExecution(id);
+        if (jobExecution != null) {
+            return jobExecution.getStatus();
+        }
+        log.warn("Job with id {} does not exist", id);
+        return null;
+    }
 
-  /**
-   * @return list of data properties
-   */
-  public List<DataDTO> findAllByTypeCSV() {
+    /**
+     * @param filename - uploaded file name
+     * @return DataDTO
+     */
+    public List<DataDTO> findAllDataByFilename(String filename) {
 
-    List<FileData> dataByType = fileDataRepository.findByType(FileTypeEnum.CSV.name());
+        List<FileData> dataByFilename = fileDataRepository.findByFilename(filename);
 
-    return dataByType.stream()
-            .map(fileData -> DataDTO.builder()
-                    .data(fileData.getProperties())
-                    .filename(fileData.getFilename())
-                    .build())
-            .collect(Collectors.toList());
-  }
+        return dataByFilename.stream()
+                .map(fileData -> DataDTO.builder()
+                        .data(fileData.getProperties())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * @return list of data properties
+     */
+    public List<DataDTO> findAllByTypeCSV() {
+
+        List<FileData> dataByType = fileDataRepository.findByType(FileTypeEnum.CSV.name());
+
+        return dataByType.stream()
+                .map(fileData -> DataDTO.builder()
+                        .data(fileData.getProperties())
+                        .filename(fileData.getFilename())
+                        .build())
+                .collect(Collectors.toList());
+    }
 
 
 }

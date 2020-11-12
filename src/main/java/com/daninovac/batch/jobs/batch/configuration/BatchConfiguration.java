@@ -174,7 +174,7 @@ public class BatchConfiguration {
     public StaxEventItemReader<Student> reader() {
 
         StaxEventItemReader<Student> reader = new StaxEventItemReader<>();
-        reader.setResource(new ClassPathResource("student.xml"));
+        reader.setResource(new ClassPathResource("test-data/student.xml"));
         reader.setFragmentRootElementName("student");
         reader.setUnmarshaller(unMarshaller());
         return reader;
@@ -183,8 +183,10 @@ public class BatchConfiguration {
     @Bean
     public FlatFileItemWriter<Student> writer() {
 
+
         FlatFileItemWriter<Student> writer = new FlatFileItemWriter<>();
-        writer.setResource(new FileSystemResource("csv/" + Constants.XML_CONVERTED_FILENAME));
+        String path = Constants.TEMP_DIRECTORY + "/" + Constants.DIRECTORY_NAME + "/" + Constants.XML_CONVERTED_FILENAME;
+        writer.setResource(new FileSystemResource(path));
         writer.setLineAggregator(new DelimitedLineAggregator<Student>() {{
             setDelimiter(";");
             setFieldExtractor(new BeanWrapperFieldExtractor<Student>() {{

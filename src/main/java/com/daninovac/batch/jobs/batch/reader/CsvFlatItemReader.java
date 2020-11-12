@@ -2,8 +2,14 @@ package com.daninovac.batch.jobs.batch.reader;
 
 
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.LineMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -20,56 +26,79 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
 
-  public CsvFlatItemReader(
-          @Value("#{jobParameters['path']}") String pathToFile,
-          @Value("#{jobParameters['delimiter']}") String delimiter
-  ) {
+    private ExecutionContext executionContext;
 
-    super();
+    private String pathToFile;
 
-    LineMapper<FileData> lineMapper = buildLineMapper(delimiter);
+    public CsvFlatItemReader(
+            @Value("#{jobParameters['path']}") String pathToFile,
+            @Value("#{jobParameters['delimiter']}") String delimiter
+    ) {
 
-    this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
-    this.setResource(new FileSystemResource(pathToFile));
-    this.setLinesToSkip(1);
-    this.setLineMapper(lineMapper);
-  }
+        super();
 
-  private LineMapper<FileData> buildLineMapper(String delimiter) {
+        LineMapper<FileData> lineMapper = buildLineMapper(delimiter);
+        this.pathToFile = pathToFile;
+        this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
+        this.setResource(new FileSystemResource(pathToFile));
+        this.setLinesToSkip(1);
+        this.setLineMapper(lineMapper);
+    }
 
-    DefaultLineMapper<FileData> lineMapper = new DefaultLineMapper<>();
+    private LineMapper<FileData> buildLineMapper(String delimiter) {
 
-    DelimitedLineTokenizer lineTokenizer = buildLineTokenizer(delimiter);
-    lineMapper.setLineTokenizer(lineTokenizer);
+        DefaultLineMapper<FileData> lineMapper = new DefaultLineMapper<>();
 
-    FieldSetMapper<FileData> dataMapper = new CsvFieldSetMapper();
-    lineMapper.setFieldSetMapper(dataMapper);
+        DelimitedLineTokenizer lineTokenizer = buildLineTokenizer(delimiter);
+        lineMapper.setLineTokenizer(lineTokenizer);
 
-    return lineMapper;
-  }
+        FieldSetMapper<FileData> dataMapper = new CsvFieldSetMapper();
+        lineMapper.setFieldSetMapper(dataMapper);
 
-
-  private DelimitedLineTokenizer buildLineTokenizer(String delimiter) {
-
-    DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
-    lineTokenizer.setDelimiter(delimiter);
-    lineTokenizer.setStrict(false);
-
-    setDynamicHeaders(delimiter, lineTokenizer);
-
-    return lineTokenizer;
-  }
+        return lineMapper;
+    }
 
 
-  /**
-   * dynamic way of fetching headers of the csv document
-   *
-   * @param delimiter
-   * @param lineTokenizer
-   */
-  private void setDynamicHeaders(String delimiter, DelimitedLineTokenizer lineTokenizer) {
+    private DelimitedLineTokenizer buildLineTokenizer(String delimiter) {
 
-    this.setSkippedLinesCallback(skippedLine -> lineTokenizer.setNames(skippedLine.split(delimiter)));
-  }
+        DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
+        lineTokenizer.setDelimiter(delimiter);
+        lineTokenizer.setStrict(false);
+
+        setDynamicHeaders(delimiter, lineTokenizer);
+
+        return lineTokenizer;
+    }
+
+
+    /**
+     * dynamic way of fetching headers of the csv document
+     *
+     * @param delimiter
+     * @param lineTokenizer
+     */
+    private void setDynamicHeaders(String delimiter, DelimitedLineTokenizer lineTokenizer) {
+
+        this.setSkippedLinesCallback(skippedLine -> lineTokenizer.setNames(skippedLine.split(delimiter)));
+    }
+
+    @BeforeStep
+    public void retrieveInterstepData(StepExecution stepExecution) {
+
+        JobExecution jobExecution = stepExecution.getJobExecution();
+        executionContext = jobExecution.getExecutionContext();
+
+        FileTypeEnum fileExtension = FileTypeEnum.valueOf(jobExecution.getJobParameters().getString(Constants.FILE_EXTENSION));
+        if (fileExtension.equals(FileTypeEnum.XML)) {
+            /*pathToFile = String.format("%s/%s.%s",
+                    jobExecution.getJobParameters().getString(Constants.PATH_TO_TEMP_FOLDER),
+                    jobExecution.getJobParameters().getString(Constants.FILENAME),
+                    jobExecution.getJobParameters().getString(Constants.FILE_EXTENSION)
+            );*/
+            pathToFile = jobExecution.getJobParameters().getString(Constants.PATH_TO_TEMP_FOLDER) + "/student.csv"; //todo make it nice
+        }
+
+
+    }
 
 }

@@ -25,11 +25,9 @@ public class FileUtils {
 
     }
 
-    public static File saveFileInTemporaryFolder(MultipartFile multipartFile) throws IOException {
+    public static File saveFileInTemporaryFolder(File tempUploadedFileDirectory, MultipartFile multipartFile) throws IOException {
 
-        File tempUploadedFileDirectory = new File(Constants.TEMP_DIRECTORY, "jobs");
-
-        createDirectory(tempUploadedFileDirectory);
+        String pathToTempDirectory = createDirectory(tempUploadedFileDirectory);
 
         if (tempUploadedFileDirectory.exists()) {
             final String originalFilename = getFilename(multipartFile);
@@ -52,11 +50,12 @@ public class FileUtils {
      * @param tempUploadedFileDirectory
      * @implNote on Windows worked without this func, but MacOS needed it
      */
-    private static void createDirectory(File tempUploadedFileDirectory) {
+    private static String createDirectory(File tempUploadedFileDirectory) {
 
         if (!tempUploadedFileDirectory.exists()) {
             tempUploadedFileDirectory.mkdir();
         }
+        return tempUploadedFileDirectory.getAbsolutePath();
     }
 
     /**

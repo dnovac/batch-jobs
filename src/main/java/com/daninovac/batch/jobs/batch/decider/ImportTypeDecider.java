@@ -18,7 +18,7 @@ public class ImportTypeDecider implements JobExecutionDecider {
   public FlowExecutionStatus decide(JobExecution jobExecution, StepExecution stepExecution) {
 
     JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
-    FileTypeEnum filetype = FileTypeEnum.valueOf(parameters.getString(Constants.TYPE));
+    FileTypeEnum filetype = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
     return new FlowExecutionStatus(filetype.name());
 
    /* switch (filetype) {

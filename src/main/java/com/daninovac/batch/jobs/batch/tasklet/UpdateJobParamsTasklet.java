@@ -4,6 +4,7 @@ import com.daninovac.batch.jobs.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
  * @project batch-jobs
  */
 @Slf4j
+@StepScope
 @Component
 @RequiredArgsConstructor
 public class UpdateJobParamsTasklet implements Tasklet {
@@ -26,7 +28,7 @@ public class UpdateJobParamsTasklet implements Tasklet {
             .getStepExecution()
             .getJobExecution()
             .getExecutionContext()
-            .put(Constants.PATH, Constants.XML_CONVERTED_FILENAME);
+            .put(Constants.PATH_TO_CONVERTED_XML, Constants.XML_CONVERTED_FILENAME);
 
     return RepeatStatus.FINISHED;
   }

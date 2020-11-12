@@ -46,7 +46,7 @@ public class CsvWriter implements ItemWriter<FileData> {
 
     JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
     this.filename = parameters.getString(Constants.FILENAME);
-    this.filetype = FileTypeEnum.valueOf(parameters.getString(Constants.TYPE));
+    this.filetype = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
   }
 
 }

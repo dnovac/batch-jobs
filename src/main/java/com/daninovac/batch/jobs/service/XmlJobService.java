@@ -43,15 +43,15 @@ public class XmlJobService {
   ) throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
           JobParametersInvalidException, InvalidFileExtensionException {
 
-    File file = saveFileInTemporaryFolder(multipartFile);
+    //File file = saveFileInTemporaryFolder(multipartFile);
     String filename = getFilename(multipartFile);
     String fileExtension = getFileExtension(filename).name();
 
     JobParameters jobParameters = new JobParametersBuilder()
-            .addString(Constants.PATH, file.getAbsolutePath())
+            //.addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
             .addString(Constants.DELIMITER, delimiter)
             .addString(Constants.FILENAME, filename)
-            .addString(Constants.TYPE, fileExtension)
+            .addString(Constants.FILE_EXTENSION, fileExtension)
             .addLong(Constants.TIME, System.currentTimeMillis())
             .toJobParameters();
 

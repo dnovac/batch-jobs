@@ -79,6 +79,7 @@ public class XmlReader extends FlatFileItemReader<Student> {
       xStream.registerConverter(new XmlXStreamConverter());
       xStream.alias("root", Map.class);
 
+      //it only gets different attributes, if the same it overwrites
       Map<String, String> extractedMap = (Map<String, String>) xStream.fromXML(sourceXml);
       extractedMap.values().forEach(System.out::println);
     } catch (IOException e) {

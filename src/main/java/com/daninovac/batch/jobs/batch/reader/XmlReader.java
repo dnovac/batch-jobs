@@ -2,25 +2,27 @@ package com.daninovac.batch.jobs.batch.reader;
 
 import com.daninovac.batch.jobs.batch.model.Student;
 import com.daninovac.batch.jobs.utils.Constants;
-import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import com.daninovac.batch.jobs.utils.xml.XmlXStreamConverter;
+import com.thoughtworks.xstream.XStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.xml.bind.JAXBException;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.persistence.dynamic.DynamicEntity;
-import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContext;
-import org.eclipse.persistence.jaxb.dynamic.DynamicJAXBContextFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
-import org.springframework.batch.item.xml.StaxEventItemReader;
+import org.springframework.batch.item.file.FlatFileItemReader;
+import org.springframework.batch.item.file.mapping.DefaultLineMapper;
+import org.springframework.batch.item.file.separator.DefaultRecordSeparatorPolicy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.oxm.xstream.XStreamMarshaller;
@@ -30,16 +32,20 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @StepScope
 @Component
-public class XmlStaxEventItemReader extends StaxEventItemReader<Student> {
+public class XmlReader extends FlatFileItemReader<Student> {
 
   private ExecutionContext executionContext;
 
-  public XmlStaxEventItemReader(@Value("#{jobParameters['path']}") String pathToFile) {
+  public XmlReader(@Value("#{jobParameters['path']}") String pathToFile) {
     super();
-
-    this.setFragmentRootElementName("student");
+    this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
     this.setResource(new FileSystemResource(pathToFile));
-    this.setUnmarshaller(buildXStreamMarshaller());
+    this.setLinesToSkip(1);
+    this.setLineMapper(new DefaultLineMapper());
+
+   /* this.setFragmentRootElementName("student");
+    this.setResource(new FileSystemResource(pathToFile));
+    this.setUnmarshaller(buildXStreamMarshaller());*/
   }
 
   private XStreamMarshaller buildXStreamMarshaller() {
@@ -53,7 +59,7 @@ public class XmlStaxEventItemReader extends StaxEventItemReader<Student> {
   }
 
   @BeforeStep
-  public void retrieveInterstepData(StepExecution stepExecution) {
+  public void retrieveInterstepData(StepExecution stepExecution) throws JAXBException {
 
     JobExecution jobExecution = stepExecution.getJobExecution();
     executionContext = jobExecution.getExecutionContext();
@@ -61,6 +67,43 @@ public class XmlStaxEventItemReader extends StaxEventItemReader<Student> {
     String path = jobExecution.getJobParameters().getString(Constants.PATH_TO_UPLOADED_FILE);
 
     try {
+      InputStream inputStream = new FileInputStream(path);
+      //String sourceXml = new String(inputStream.readAllBytes());
+
+      String sourceXml = new BufferedReader(
+          new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines()
+          .collect(Collectors.joining("\n"));
+      System.out.println(sourceXml);
+
+      XStream xStream = new XStream();
+      xStream.registerConverter(new XmlXStreamConverter());
+      xStream.alias("root", Map.class);
+
+      Map<String, String> extractedMap = (Map<String, String>) xStream.fromXML(sourceXml);
+      extractedMap.values().forEach(System.out::println);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+
+
+   /* String xml = xStream.toXML(map);
+    System.out.println("Result of tweaked XStream toXml()");
+    System.out.println(xml);
+*/
+
+
+   /* JAXBContext jc = JAXBContext.newInstance(Parent.class);
+    Unmarshaller unmarshaller = jc.createUnmarshaller();
+    Parent parent = (Parent) unmarshaller.unmarshal(new File(path));
+
+    System.out.println("Bio:   " + parent.getStudents());
+
+    Marshaller marshaller = jc.createMarshaller();
+    marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+    marshaller.marshal(parent, System.out);*/
+
+    /*try {
      // https://docs.oracle.com/middleware/1212/toplink/TLJAX/dynamic_jaxb.htm#TLJAX449
       InputStream inputStream = new FileInputStream(path);
       DynamicJAXBContext dContext = DynamicJAXBContextFactory
@@ -84,8 +127,7 @@ public class XmlStaxEventItemReader extends StaxEventItemReader<Student> {
     } catch (IOException | JAXBException e) {
       log.warn("Cannot read from XML file stored at: {}", path);
       e.printStackTrace();
-    }
-
+    }*/
 
   }
 

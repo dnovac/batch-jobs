@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<students>
-    <student>
-        <rollNo>100</rollNo>
-        <name>Walking Techie</name>
-        <department>CS</department>
-    </student>
-    <student>
-        <rollNo>199</rollNo>
-        <name>Novac</name>
-        <department>CS</department>
-    </student>
-    <student>
-        <rollNo>102</rollNo>
-        <name>Sachin Tendulkar</name>
-        <department>CS</department>
-    </student>
-</students>
+<root>
+  <student>
+    <department>CS</department>
+    <name>Walking Techie</name>
+    <rollNo>100</rollNo>
+  </student>
+  <student>
+    <department>CS</department>
+    <name>Novac</name>
+    <rollNo>199</rollNo>
+  </student>
+  <student>
+    <department>CS</department>
+    <name>Sachin Tendulkar</name>
+    <rollNo>102</rollNo>
+  </student>
+</root>

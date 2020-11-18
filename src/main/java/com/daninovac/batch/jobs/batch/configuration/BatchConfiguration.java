@@ -4,7 +4,6 @@ package com.daninovac.batch.jobs.batch.configuration;
 import com.daninovac.batch.jobs.batch.decider.ImportTypeDecider;
 import com.daninovac.batch.jobs.batch.model.Student;
 import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
-import com.daninovac.batch.jobs.batch.reader.XmlStaxEventItemReader;
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import com.daninovac.batch.jobs.batch.writer.XmlWriter;
@@ -112,7 +111,7 @@ public class BatchConfiguration {
 
   @Bean
   public Step importXmlDataStep(
-      XmlStaxEventItemReader xmlReader,
+      FlatFileItemReader xmlReader,
       XmlWriter xmlWriter,
       XmlToCsvProcessor xmlProcessor
   ) {
@@ -123,6 +122,31 @@ public class BatchConfiguration {
         .processor(xmlProcessor)
         .build();
   }
+
+/*  public ItemReader<? extends Student> reader() {
+    obExecution jobExecution = stepExecution.getJobExecution();
+    executionContext = jobExecution.getExecutionContext();
+
+    String path = jobExecution.getJobParameters().getString(Constants.PATH_TO_UPLOADED_FILE);
+
+
+    try {
+      JAXBContext jc = JAXBContext.newInstance(XmlRootProperty.class);
+      Unmarshaller unmarshaller = jc.createUnmarshaller();
+      XmlRootProperty parent = (XmlRootProperty) unmarshaller
+          .unmarshal(new File(path));
+
+      System.out.println("Bio:   " + parent.getParent());
+
+      Marshaller marshaller = jc.createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+      marshaller.marshal(parent, System.out);
+    } catch (JAXBException e) {
+      e.printStackTrace();
+    }
+
+    return null;
+  }*/
 
   @Bean
   public ImportTypeDecider fileTypeDecider() {

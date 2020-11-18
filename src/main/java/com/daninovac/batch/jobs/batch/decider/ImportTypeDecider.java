@@ -21,11 +21,6 @@ public class ImportTypeDecider implements JobExecutionDecider {
     FileTypeEnum filetype = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
     return new FlowExecutionStatus(filetype.name());
 
-   /* switch (filetype) {
-      case CSV -> new FlowExecutionStatus(filetype.name());
-      case XML -> new FlowExecutionStatus(filetype.name());
-    }*/
-
   }
 
 }

@@ -43,7 +43,6 @@ public class CsvJobController {
 
     log.info("Starting job CSV-Import for file: [{}] bytes and delimiter [{}]", file.getSize(),
         delimiter);
-
     Long jobId = csvJobService.runJobCsvImport(delimiter, file);
 
     return ResponseEntity.accepted().body(jobId);

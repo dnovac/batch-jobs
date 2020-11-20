@@ -16,7 +16,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 
@@ -29,10 +28,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class BatchJobsConfiguration {
 
   private final JobBuilderFactory jobBuilderFactory;
-
-  @Value("${batch.chunk-size:1000}")
-  private int chunkSize;
-
 
   @Bean
   public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
@@ -52,7 +47,6 @@ public class BatchJobsConfiguration {
 
 
   @Bean
-  @Primary
   public Job fileImportJob(
       ImportTypeDecider fileTypeDecider,
       Step cleanupRepositoryStep,

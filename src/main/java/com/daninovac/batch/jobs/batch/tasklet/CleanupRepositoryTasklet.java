@@ -2,6 +2,7 @@ package com.daninovac.batch.jobs.batch.tasklet;
 
 
 import com.daninovac.batch.jobs.repository.FileDataRepository;
+import com.daninovac.batch.jobs.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -21,21 +22,19 @@ public class CleanupRepositoryTasklet implements Tasklet {
 
   @Override
   public RepeatStatus execute(
-          StepContribution stepContribution, ChunkContext chunkContext
-  ) throws Exception {
+      StepContribution stepContribution, ChunkContext chunkContext) {
 
     final JobParameters jobParameters = chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters();
-    String filename = jobParameters.getString("filename");
+        .getStepExecution()
+        .getJobParameters();
+    String filename = jobParameters.getString(Constants.FILENAME);
 
-    if (fileDataRepository.findByFilename(filename).size() > 0) {
-      log.warn("The filename: {} has been found already in the database. Old related data will be deleted!", filename);
+    if (!fileDataRepository.findByFilename(filename).isEmpty()) {
+      log.warn(
+          "The filename: {} has been found already in the database. Old related data will be deleted!",
+          filename);
       fileDataRepository.deleteByFilename(filename);
     }
-    log.info("Cleaning up database step executed");
-
     return RepeatStatus.FINISHED;
   }
-
 }

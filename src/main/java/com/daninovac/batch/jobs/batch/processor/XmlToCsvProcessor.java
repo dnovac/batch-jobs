@@ -1,8 +1,14 @@
 package com.daninovac.batch.jobs.batch.processor;
 
 import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.stereotype.Component;
 
@@ -11,19 +17,37 @@ import org.springframework.stereotype.Component;
 @Component
 public class XmlToCsvProcessor implements ItemProcessor<Object, FileData> {
 
-  @Override
-  public FileData process(Object item) {
+  private String filename;
 
-    log.info("Data processed : " + item);
-    FileData fileData = new FileData();
-    fileData.setFilename("filename");
-    fileData.setType("XML");
-    if (item instanceof Map) {
-      fileData.setProperties((Map) item);
+  private FileTypeEnum fileType;
+
+  @Override
+  public FileData process(@SuppressWarnings("NullableProblems") Object data)
+      throws JobParametersInvalidException {
+    return buildFileData(data);
+  }
+
+  private FileData buildFileData(Object data) throws JobParametersInvalidException {
+    if (data instanceof Map) {
+      log.info("XML data is being processed...");
+      FileData fileData = new FileData();
+      fileData.setFilename(filename);
+      fileData.setType(fileType.name());
+      fileData.setProperties((Map) data);
+      return fileData;
     } else {
-      log.warn("Parsed XML data is not valid!");
+      String errorMessage = "Parsed XML data is not valid!";
+      log.warn(errorMessage);
+      throw new JobParametersInvalidException(errorMessage);
     }
-    return fileData;
+  }
+
+  @BeforeStep
+  public void fillParameters(final StepExecution stepExecution) {
+
+    JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
+    this.filename = parameters.getString(Constants.FILENAME);
+    this.fileType = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
   }
 
 }

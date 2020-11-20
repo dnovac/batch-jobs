@@ -29,15 +29,15 @@ public class CsvWriter implements ItemWriter<FileData> {
   private FileTypeEnum filetype;
 
   @Override
-  public void write(List<? extends FileData> list) {
+  public void write(List<? extends FileData> data) {
 
-    log.info("Step write executed! Writing values in database");
-    list.forEach(job -> {
-      job.setFilename(filename);
-      job.setType(filetype.name());
+    log.info("Writing data chunk of {} from CSV import to database...", data.size());
+    data.forEach(row -> {
+      row.setFilename(filename);
+      row.setType(filetype.name());
     });
 
-    fileDataRepository.saveAll(list);
+    fileDataRepository.saveAll(data);
   }
 
   @BeforeStep

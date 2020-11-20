@@ -18,9 +18,8 @@ public class XmlWriter implements ItemWriter<FileData> {
   private final FileDataRepository fileDataRepository;
 
   @Override
-  public void write(List<? extends FileData> data) throws Exception {
-    log.info("Writing data from XML import to database...");
+  public void write(List<? extends FileData> data) {
+    log.info("Writing data chunk of {} from XML import to database...", data.size());
     fileDataRepository.saveAll(data);
-
   }
 }

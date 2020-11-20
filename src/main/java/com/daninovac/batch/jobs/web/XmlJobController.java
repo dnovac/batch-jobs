@@ -3,7 +3,6 @@ package com.daninovac.batch.jobs.web;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.XmlJobService;
 import java.io.IOException;
-import javax.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -34,16 +33,13 @@ public class XmlJobController {
 
   @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<Long> triggerImportCsvJob(
-      @RequestParam @Size(max = 1) String delimiter,
       @RequestParam MultipartFile file
   )
       throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
       IOException, JobParametersInvalidException, InvalidFileExtensionException {
 
-    log.info("Starting job XML-Import for file: [{}] bytes and delimiter [{}]", file.getSize(),
-        delimiter);
-
-    Long jobId = service.runJobXmlImport(delimiter, file);
+    log.info("Starting job XML-Import for file: [{}] bytes", file.getSize());
+    Long jobId = service.runJobXmlImport(file);
 
     return ResponseEntity.accepted().body(jobId);
   }

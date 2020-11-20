@@ -35,7 +35,6 @@ public class XmlJobService {
   private final JobLauncher jobLauncher;
 
   public Long runJobXmlImport(
-      String delimiter,
       MultipartFile multipartFile
   )
       throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
@@ -48,7 +47,6 @@ public class XmlJobService {
 
     JobParameters jobParameters = new JobParametersBuilder()
         .addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
-        .addString(Constants.DELIMITER, delimiter)
         .addString(Constants.FILENAME, filename)
         .addString(Constants.FILE_EXTENSION, fileExtension)
         .addLong(Constants.TIME, System.currentTimeMillis())

@@ -2,12 +2,7 @@ package com.daninovac.batch.jobs.batch.configuration;
 
 
 import com.daninovac.batch.jobs.batch.decider.ImportTypeDecider;
-import com.daninovac.batch.jobs.batch.model.Student;
-import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
 import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
-import com.daninovac.batch.jobs.batch.writer.CsvWriter;
-import com.daninovac.batch.jobs.batch.writer.XmlWriter;
-import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +13,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,10 +26,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Slf4j
 @RequiredArgsConstructor
 @Configuration
-public class BatchConfiguration {
+public class BatchJobsConfiguration {
 
   private final JobBuilderFactory jobBuilderFactory;
-  private final StepBuilderFactory stepBuilderFactory;
 
   @Value("${batch.chunk-size:1000}")
   private int chunkSize;
@@ -86,18 +79,6 @@ public class BatchConfiguration {
         .end();
   }
 
-  @Bean
-  public Step importCsvDataStep(
-      FlatFileItemReader<FileData> csvFlatItemReader,
-      CsvWriter csvWriter
-  ) {
-    return stepBuilderFactory.get("importCsvDataStep")
-        .<FileData, FileData>chunk(chunkSize)
-        .reader(csvFlatItemReader)
-        .writer(csvWriter)
-        .build();
-  }
-
 
   @Bean
   public Flow importXmlFlow(
@@ -109,50 +90,13 @@ public class BatchConfiguration {
         .end();
   }
 
-  @Bean
-  public Step importXmlDataStep(
-      FlatFileItemReader xmlReader,
-      XmlWriter xmlWriter,
-      XmlToCsvProcessor xmlProcessor
-  ) {
-    return stepBuilderFactory.get("importXmlDataStep")
-        .<Student, Student>chunk(chunkSize)
-        .reader(xmlReader)
-        .writer(xmlWriter)
-        .processor(xmlProcessor)
-        .build();
-  }
-
-/*  public ItemReader<? extends Student> reader() {
-    obExecution jobExecution = stepExecution.getJobExecution();
-    executionContext = jobExecution.getExecutionContext();
-
-    String path = jobExecution.getJobParameters().getString(Constants.PATH_TO_UPLOADED_FILE);
-
-
-    try {
-      JAXBContext jc = JAXBContext.newInstance(XmlRootProperty.class);
-      Unmarshaller unmarshaller = jc.createUnmarshaller();
-      XmlRootProperty parent = (XmlRootProperty) unmarshaller
-          .unmarshal(new File(path));
-
-      System.out.println("Bio:   " + parent.getParent());
-
-      Marshaller marshaller = jc.createMarshaller();
-      marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-      marshaller.marshal(parent, System.out);
-    } catch (JAXBException e) {
-      e.printStackTrace();
-    }
-
-    return null;
-  }*/
 
   @Bean
   public ImportTypeDecider fileTypeDecider() {
     return new ImportTypeDecider();
   }
 
+  //todo i dont think it's needed
   @Bean
   public Step cleanupRepositoryStep(
       StepBuilderFactory stepBuilderFactory,

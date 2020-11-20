@@ -7,7 +7,6 @@ import static com.daninovac.batch.jobs.utils.FileUtils.getFilename;
 import static com.daninovac.batch.jobs.utils.FileUtils.saveFileInTemporaryFolder;
 
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
-import com.daninovac.batch.jobs.repository.FileDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +17,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -35,10 +33,6 @@ public class XmlJobService {
   private final Job fileImportJob;
 
   private final JobLauncher jobLauncher;
-
-  private final JobExplorer jobExplorer;
-
-  private final FileDataRepository fileDataRepository;
 
   public Long runJobXmlImport(
       String delimiter,

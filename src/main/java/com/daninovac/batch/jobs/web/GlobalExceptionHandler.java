@@ -17,7 +17,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
   @ExceptionHandler(InvalidFileExtensionException.class)
-  public ResponseEntity<String> handleInvalidFileExtensionException(InvalidFileExtensionException e) {
+  public ResponseEntity<String> handleInvalidFileExtensionException(
+      InvalidFileExtensionException e) {
 
     log.info("Invalid file extension exception occurred: {}", e.getMessage());
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

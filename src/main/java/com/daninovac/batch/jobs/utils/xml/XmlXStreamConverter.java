@@ -47,12 +47,21 @@ public class XmlXStreamConverter implements Converter {
       reader.moveDown();
 
       String key = reader.getNodeName();
-      String value = reader.getValue().replaceAll("\\n|\\t", "");
+     /* String value = reader.getValue().replaceAll("\\n|\\t", "");
       if (value.isBlank()) {
         map.put(key, unmarshal(reader, unmarshallingContext));
       } else {
         map.put(key, value);
+      }*/
+
+      //https://stackoverflow.com/questions/12536683/multiple-values-for-a-key-in-hashmap-in-java
+      Object value = null;
+      if (reader.hasMoreChildren()) {
+        value = unmarshal(reader, unmarshallingContext);
+      } else {
+        value = reader.getValue();
       }
+      map.put(key, value);
       reader.moveUp();
     }
     return map;

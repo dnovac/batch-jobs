@@ -33,7 +33,6 @@ public class BatchJobsConfiguration {
   public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
       @Value("${batch.max-jobs:10}") Integer maxJobs
   ) {
-
     ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
     threadPoolExecutor.setMaxPoolSize(maxJobs);
     threadPoolExecutor.setQueueCapacity(0);
@@ -53,7 +52,6 @@ public class BatchJobsConfiguration {
       Flow importCsvFlow,
       Flow importXmlFlow
   ) {
-
     return jobBuilderFactory.get("fileImportJob")
         .incrementer(new RunIdIncrementer())
         .start(cleanupRepositoryStep)
@@ -62,7 +60,6 @@ public class BatchJobsConfiguration {
         .end()
         .build();
   }
-
 
   @Bean
   public Flow importCsvFlow(
@@ -73,17 +70,14 @@ public class BatchJobsConfiguration {
         .end();
   }
 
-
   @Bean
   public Flow importXmlFlow(
       Step importXmlDataStep
   ) {
-
     return new FlowBuilder<Flow>("importXmlFlow")
         .start(importXmlDataStep)
         .end();
   }
-
 
   @Bean
   public ImportTypeDecider fileTypeDecider() {

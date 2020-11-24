@@ -1,7 +1,7 @@
 package com.daninovac.batch.jobs.batch.writer;
 
-import com.daninovac.batch.jobs.entity.FileData;
-import com.daninovac.batch.jobs.repository.FileDataRepository;
+import com.daninovac.batch.jobs.entity.XmlData;
+import com.daninovac.batch.jobs.repository.XmlDataRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +13,13 @@ import org.springframework.stereotype.Component;
 @StepScope
 @Component
 @RequiredArgsConstructor
-public class XmlWriter implements ItemWriter<FileData> {
+public class XmlWriter implements ItemWriter<XmlData> {
 
-  private final FileDataRepository fileDataRepository;
+  private final XmlDataRepository xmlDataRepository;
 
   @Override
-  public void write(List<? extends FileData> data) {
+  public void write(List<? extends XmlData> data) {
     log.info("Writing data chunk of {} from XML import to database...", data.size());
-    fileDataRepository.saveAll(data);
+    xmlDataRepository.saveAll(data);
   }
 }

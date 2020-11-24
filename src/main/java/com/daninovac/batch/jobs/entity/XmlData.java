@@ -2,6 +2,7 @@ package com.daninovac.batch.jobs.entity;
 
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,13 +15,16 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
-
+/**
+ * @author Dan Novac on 24/11/2020
+ * @project batch-jobs
+ */
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
-public class FileData {
+public class XmlData {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,6 +36,5 @@ public class FileData {
 
   @Type(type = "hstore")
   @Column(columnDefinition = "hstore")
-  private Map<String, String> properties = new HashMap<>();
-
+  private Map<String, List<Object>> properties = new HashMap<>();
 }

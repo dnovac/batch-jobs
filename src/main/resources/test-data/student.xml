@@ -14,5 +14,10 @@
     <department>CS</department>
     <name>Sachin Tendulkar</name>
     <rollNo>102</rollNo>
+    <college>
+      <id>101200</id>
+      <info>CS</info>
+      <university>Transilvanian College</university>
+    </college>
   </studentx>
 </root>

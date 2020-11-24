@@ -1,12 +1,13 @@
 package com.daninovac.batch.jobs.utils.xml;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.Map;
 
 //TODO: not working with nested elements. Make it work!!
@@ -39,10 +40,11 @@ public class XmlXStreamConverter implements Converter {
   }
 
   @Override
-  public Object unmarshal(HierarchicalStreamReader reader,
+  public Multimap<String, Object> unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext unmarshallingContext) {
 
-    Map<String, Object> map = new HashMap<>();
+    //Map<String, Object> map = new HashMap<>();
+    Multimap<String, Object> map = ArrayListMultimap.create();
     while (reader.hasMoreChildren()) {
       reader.moveDown();
 

@@ -3,6 +3,9 @@ package com.daninovac.batch.jobs.batch.processor;
 import com.daninovac.batch.jobs.entity.FileData;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimaps;
+import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
@@ -28,12 +31,18 @@ public class XmlToCsvProcessor implements ItemProcessor<Object, FileData> {
   }
 
   private FileData buildFileData(Object data) throws JobParametersInvalidException {
-    if (data instanceof Map) {
+    if (data instanceof ArrayListMultimap) {
       log.info("XML data is being processed...");
       FileData fileData = new FileData();
       fileData.setFilename(filename);
       fileData.setType(fileType.name());
-      fileData.setProperties((Map) data);
+
+      ArrayListMultimap<String, Object> dataMultiMap = ArrayListMultimap.create();
+      ((ArrayListMultimap<String, Object>) data).forEach(dataMultiMap::put);
+
+      Map<String, List<Object>> mapOfProperties = Multimaps.asMap(dataMultiMap);
+
+      fileData.setProperties(mapOfProperties);
       return fileData;
     } else {
       String errorMessage = "Parsed XML data is not valid!";

@@ -1,6 +1,7 @@
 package com.daninovac.batch.jobs.batch.reader.xml;
 
 import com.daninovac.batch.jobs.utils.xml.XmlXStreamConverter;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class XmlReader extends StaxEventItemReader<Object> {
 
-  public XmlReader(@Value("#{jobParameters['path']}") String path) {
+  public XmlReader(@Value("#{jobParameters['path']}") String path) throws FileNotFoundException {
     XStreamMarshaller unMarshaller = new XStreamMarshaller();
     Map<String, Class<?>> aliases = new HashMap<>();
     aliases.put("root", Map.class);

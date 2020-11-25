@@ -26,10 +26,19 @@ services:
 
   mongo:
     image: mongo
-    container_name: batchjobs-mongo
+    container_name: mongodb-batchjobs
+    hostname: mongodb-batchjobs
     volumes:
-      - $HOME/data/batchjobs-mongo-data:/data/db
-      - $HOME/data/batchjobs-mongo-bkp:/data/bkp
+      - $HOME/data/mongodb-batchjobs:/data/db
+      - $HOME/data/mongodb-batchjobs:/data/bkp
     restart: always
+    #    env_file:
+    #      - .env
+    #      environment:
+    #        MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+    #        MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    #        MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
       - 27017:27017
+#    command: ["-f", "/etc/mongod.conf"] TODO: create script to create user/pass/db
+

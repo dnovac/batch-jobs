@@ -10,7 +10,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.AbstractMap;
 import java.util.Map;
 
-//TODO: not working with nested elements. Make it work!!
 public class XmlXStreamConverter implements Converter {
 
   @Override
@@ -43,21 +42,12 @@ public class XmlXStreamConverter implements Converter {
   public Multimap<String, Object> unmarshal(HierarchicalStreamReader reader,
       UnmarshallingContext unmarshallingContext) {
 
-    //Map<String, Object> map = new HashMap<>();
     Multimap<String, Object> map = ArrayListMultimap.create();
     while (reader.hasMoreChildren()) {
       reader.moveDown();
 
       String key = reader.getNodeName();
-     /* String value = reader.getValue().replaceAll("\\n|\\t", "");
-      if (value.isBlank()) {
-        map.put(key, unmarshal(reader, unmarshallingContext));
-      } else {
-        map.put(key, value);
-      }*/
-
-      //https://stackoverflow.com/questions/12536683/multiple-values-for-a-key-in-hashmap-in-java
-      Object value = null;
+      Object value;
       if (reader.hasMoreChildren()) {
         value = unmarshal(reader, unmarshallingContext);
       } else {

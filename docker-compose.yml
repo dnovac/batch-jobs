@@ -1,19 +1,33 @@
 version: '3.1'
+
 services:
-  #app:
-  #container_name: batch-jobs
-  #image: app-batch-jobs
-  #build: ./
-  #ports:
-  #  - "8080:8080"
-  #depends_on:
-  #  - dbpostgresql
-  dbpostgresql:
-    image: postgres
-    container_name: "postgres_db_container"
+  app:
+    build: ./
+    container_name: batchjobs
+    #image: batch-jobs:latest
+    restart: always
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=batchjobs
+      - "8080:8080"
+    depends_on:
+      #- dbpostgresql
+      - mongo
+    working_dir: /opt/app
+
+
+  #  dbpostgresql:
+  #    image: postgres
+  #    container_name: "postgres_db_container"
+  #    ports:
+  #      - "5432:5432"
+  #    environment:
+  #      - POSTGRES_PASSWORD=docker
+  #      - POSTGRES_USER=postgres
+  #      - POSTGRES_DB=batchjobs
+
+  mongo:
+    image: mongo
+    container_name: batchjobs-mongo
+    volumes:
+      - $HOME/data/batchjobs-mongo-data:/data/db
+      - $HOME/data/batchjobs-mongo-bkp:/data/bkp
+    restart: always

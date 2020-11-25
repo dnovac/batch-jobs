@@ -31,3 +31,5 @@ services:
       - $HOME/data/batchjobs-mongo-data:/data/db
       - $HOME/data/batchjobs-mongo-bkp:/data/bkp
     restart: always
+    ports:
+      - 27017:27017

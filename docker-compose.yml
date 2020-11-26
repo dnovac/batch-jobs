@@ -9,20 +9,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      #- dbpostgresql
       - mongo
     working_dir: /opt/app
-
-
-  #  dbpostgresql:
-  #    image: postgres
-  #    container_name: "postgres_db_container"
-  #    ports:
-  #      - "5432:5432"
-  #    environment:
-  #      - POSTGRES_PASSWORD=docker
-  #      - POSTGRES_USER=postgres
-  #      - POSTGRES_DB=batchjobs
 
   mongo:
     image: mongo

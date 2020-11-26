@@ -5,6 +5,11 @@
     <name>Walking Techie</name>
     <rollNo>100</rollNo>
   </student>
+  <student age="25">
+    <department>CS1</department>
+    <name>Walking</name>
+    <rollNo>10110</rollNo>
+  </student>
   <student>
     <department>CS</department>
     <name>Novac</name>
@@ -20,4 +25,14 @@
       <university>Transilvanian College</university>
     </college>
   </studentx>
+  <studentTest>
+    <college>
+      <id>1012010</id>
+      <info>German</info>
+      <university>Transilvanian College</university>
+    </college>
+    <department>INFO</department>
+    <name>TestName</name>
+    <rollNo>1022test</rollNo>
+  </studentTest>
 </root>

@@ -1,7 +1,6 @@
 package com.daninovac.batch.jobs.batch.tasklet;
 
 
-import com.daninovac.batch.jobs.repository.FileDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +15,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CleanupRepositoryTasklet implements Tasklet {
-
-  private final FileDataRepository fileDataRepository;
+public class LoggerTasklet implements Tasklet {
 
   @Override
   public RepeatStatus execute(
@@ -28,13 +25,8 @@ public class CleanupRepositoryTasklet implements Tasklet {
         .getStepExecution()
         .getJobParameters();
     String filename = jobParameters.getString(Constants.FILENAME);
+    log.info(String.format("Starting to import file %s...", filename));
 
-    if (!fileDataRepository.findByFilename(filename).isEmpty()) {
-      log.warn(
-          "The filename: {} has been found already in the database. Old related data will be deleted!",
-          filename);
-      fileDataRepository.deleteByFilename(filename);
-    }
     return RepeatStatus.FINISHED;
   }
 }

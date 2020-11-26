@@ -1,7 +1,7 @@
 package com.daninovac.batch.jobs.batch.configuration;
 
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
-import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -20,11 +20,11 @@ public class CsvStepsConfiguration {
 
   @Bean
   public Step importCsvDataStep(
-      FlatFileItemReader<FileData> csvFlatItemReader,
+      FlatFileItemReader<CsvDataDocument> csvFlatItemReader,
       CsvWriter csvWriter
   ) {
     return stepBuilderFactory.get("importCsvDataStep")
-        .<FileData, FileData>chunk(chunkSize)
+        .<CsvDataDocument, CsvDataDocument>chunk(chunkSize)
         .reader(csvFlatItemReader)
         .writer(csvWriter)
         .build();

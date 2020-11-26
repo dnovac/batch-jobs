@@ -1,6 +1,6 @@
 package com.daninovac.batch.jobs.entity;
 
-import java.util.Map;
+import com.google.common.collect.ListMultimap;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import lombok.Builder;
@@ -8,14 +8,10 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-/**
- * @author Dan Novac on 25/11/2020
- * @project batch-jobs
- */
 @Data
 @Builder
 @Document
-public class CsvDataDocument {
+public class XmlDataDocument {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
@@ -25,5 +21,5 @@ public class CsvDataDocument {
 
   private String type;
 
-  private Map<String, String> properties;
+  private ListMultimap<String, Object> properties;
 }

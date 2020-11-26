@@ -3,8 +3,7 @@ package com.daninovac.batch.jobs.batch.configuration;
 import com.daninovac.batch.jobs.batch.processor.XmlToCsvProcessor;
 import com.daninovac.batch.jobs.batch.reader.xml.XmlReader;
 import com.daninovac.batch.jobs.batch.writer.XmlWriter;
-import com.daninovac.batch.jobs.entity.FileData;
-import com.daninovac.batch.jobs.entity.XmlData;
+import com.daninovac.batch.jobs.entity.XmlDataDocument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
@@ -28,7 +27,7 @@ public class XmlStepsConfiguration {
       XmlToCsvProcessor xmlProcessor
   ) {
     return stepBuilderFactory.get("importXmlDataStep")
-        .<Object, XmlData>chunk(chunkSize)
+        .<Object, XmlDataDocument>chunk(chunkSize)
         .reader(xmlReader)
         .writer(xmlWriter)
         .processor(xmlProcessor)

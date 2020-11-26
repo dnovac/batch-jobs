@@ -1,7 +1,6 @@
 package com.daninovac.batch.jobs.batch.reader.xml;
 
 import com.daninovac.batch.jobs.utils.xml.XmlXStreamConverter;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
@@ -34,6 +33,7 @@ public class XmlReader extends StaxEventItemReader<Object> {
       throw new JobParametersInvalidException(
           "XML root property must be defined in the properties file!");
     }
+
     XStreamMarshaller unMarshaller = new XStreamMarshaller();
     Map<String, Class<?>> aliases = new HashMap<>();
     aliases.put(root, Map.class);

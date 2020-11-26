@@ -1,6 +1,6 @@
 package com.daninovac.batch.jobs.batch.reader.csv;
 
-import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
@@ -13,15 +13,15 @@ import org.springframework.batch.item.file.transform.FieldSet;
 
 @Slf4j
 @NoArgsConstructor
-public class CsvFieldSetMapper implements FieldSetMapper<FileData> {
+public class CsvFieldSetMapper implements FieldSetMapper<CsvDataDocument> {
 
   /**
    * @param fieldSet
-   * @return FileData
+   * @return CsvDataDocument object
    */
   @SuppressWarnings("NullableProblems")
   @Override
-  public FileData mapFieldSet(FieldSet fieldSet) {
+  public CsvDataDocument mapFieldSet(FieldSet fieldSet) {
 
     List<String> columnNames = Arrays.asList(fieldSet.getNames());
     ConcurrentMap<String, String> columnProperties = columnNames.parallelStream()
@@ -30,9 +30,6 @@ public class CsvFieldSetMapper implements FieldSetMapper<FileData> {
             (prop1, prop2) -> prop1
         ));
 
-    FileData fileData = new FileData();
-    fileData.setProperties(columnProperties);
-
-    return fileData;
+    return CsvDataDocument.builder().properties(columnProperties).build();
   }
 }

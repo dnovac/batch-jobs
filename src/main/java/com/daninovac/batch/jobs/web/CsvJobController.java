@@ -48,16 +48,16 @@ public class CsvJobController {
     return ResponseEntity.accepted().body(jobId);
   }
 
-  @GetMapping("/find/{filename}")
-  public List<DataDTO> findByFilename(@PathVariable String filename) {
+  @GetMapping("/data/{filename}")
+  public List<DataDTO> findDataByFilename(@PathVariable String filename) {
 
     return csvJobService.findAllDataByFilename(filename);
   }
 
-  @GetMapping("/find-by-type")
-  public List<DataDTO> findByFileType() {
+  @GetMapping("/data")
+  public List<DataDTO> findAll() {
 
-    return csvJobService.findAllByTypeCSV();
+    return csvJobService.findAllCollection();
   }
 
   @GetMapping("/status/{id}")
@@ -65,6 +65,5 @@ public class CsvJobController {
 
     return csvJobService.getJobStatus(jobId);
   }
-
 
 }

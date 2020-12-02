@@ -1,6 +1,7 @@
 package com.daninovac.batch.jobs.utils.xml;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
@@ -22,9 +23,10 @@ public class XmlXStreamConverter implements Converter {
   public void marshal(Object value, HierarchicalStreamWriter writer,
       MarshallingContext context) {
 
+    //noinspection rawtypes
     AbstractMap map = (AbstractMap) value;
     for (Object object : map.entrySet()) {
-      Map.Entry entry = (Map.Entry) object;
+      @SuppressWarnings("rawtypes") Map.Entry entry = (Map.Entry) object;
       writer.startNode(entry.getKey().toString());
       Object val = entry.getValue();
 
@@ -39,7 +41,8 @@ public class XmlXStreamConverter implements Converter {
   }
 
   @Override
-  public Multimap<String, Object> unmarshal(HierarchicalStreamReader reader,
+  public ImmutableMultimap<String, Object> unmarshal(
+      HierarchicalStreamReader reader,
       UnmarshallingContext unmarshallingContext) {
 
     Multimap<String, Object> map = ArrayListMultimap.create();
@@ -56,7 +59,7 @@ public class XmlXStreamConverter implements Converter {
       map.put(key, value);
       reader.moveUp();
     }
-    return map;
+    return ImmutableMultimap.copyOf(map);
   }
 
 

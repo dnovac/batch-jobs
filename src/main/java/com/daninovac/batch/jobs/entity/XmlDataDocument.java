@@ -1,6 +1,6 @@
 package com.daninovac.batch.jobs.entity;
 
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.ImmutableMap;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import lombok.Builder;
@@ -21,5 +21,5 @@ public class XmlDataDocument {
 
   private String type;
 
-  private ListMultimap<String, Object> properties;
+  private ImmutableMap<String, Object> properties;
 }

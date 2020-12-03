@@ -4,6 +4,7 @@ package com.daninovac.batch.jobs.batch.configuration;
 import com.daninovac.batch.jobs.batch.decider.ImportTypeDecider;
 import com.daninovac.batch.jobs.batch.tasklet.LoggerTasklet;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -35,12 +36,11 @@ public class BatchJobsConfiguration {
   ) {
     ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
     threadPoolExecutor.setMaxPoolSize(maxJobs);
-    threadPoolExecutor.setQueueCapacity(0);
-    threadPoolExecutor.setKeepAliveSeconds(0);
+    threadPoolExecutor.setCorePoolSize(maxJobs);
+    threadPoolExecutor.setQueueCapacity(maxJobs);
+    threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+    threadPoolExecutor.setThreadNamePrefix("MultiThreaded-");
 
-    threadPoolExecutor.setRejectedExecutionHandler((r, executor) ->
-        log.info("No available threads for Batch Job")
-    );
     return threadPoolExecutor;
   }
 
@@ -52,8 +52,10 @@ public class BatchJobsConfiguration {
       Flow importCsvFlow,
       Flow importXmlFlow
   ) {
-    return jobBuilderFactory.get("fileImportJob")
+    return jobBuilderFactory
+        .get("fileImportJob")
         .incrementer(new RunIdIncrementer())
+        //TODO: create a new flow to skip loggerStep: .flow(Step step)
         .start(loggerStep)
         .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
         .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)

@@ -1,8 +1,8 @@
 package com.daninovac.batch.jobs.batch.writer;
 
 
-import com.daninovac.batch.jobs.entity.FileData;
-import com.daninovac.batch.jobs.repository.FileDataRepository;
+import com.daninovac.batch.jobs.entity.CsvDataDocument;
+import com.daninovac.batch.jobs.repository.CsvDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import java.util.List;
@@ -20,16 +20,16 @@ import org.springframework.stereotype.Component;
 @StepScope
 @Component
 @RequiredArgsConstructor
-public class CsvWriter implements ItemWriter<FileData> {
+public class CsvWriter implements ItemWriter<CsvDataDocument> {
 
-  private final FileDataRepository fileDataRepository;
+  private final CsvDataRepository fileDataRepository;
 
   private String filename;
 
   private FileTypeEnum filetype;
 
   @Override
-  public void write(List<? extends FileData> data) {
+  public void write(List<? extends CsvDataDocument> data) {
 
     log.info("Writing data chunk of {} from CSV import to database...", data.size());
     data.forEach(row -> {
@@ -41,7 +41,7 @@ public class CsvWriter implements ItemWriter<FileData> {
   }
 
   @BeforeStep
-  public void beforeStep(final StepExecution stepExecution) {
+  public void fillParameters(final StepExecution stepExecution) {
 
     JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
     this.filename = parameters.getString(Constants.FILENAME);

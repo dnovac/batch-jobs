@@ -1,8 +1,7 @@
 package com.daninovac.batch.jobs.repository;
 
-import com.daninovac.batch.jobs.entity.FileData;
-import com.daninovac.batch.jobs.entity.XmlData;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.daninovac.batch.jobs.entity.XmlDataDocument;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Repository;
  * @project batch-jobs
  */
 @Repository
-
-public interface XmlDataRepository extends JpaRepository<XmlData, Long> {
+public interface XmlDataRepository extends MongoRepository<XmlDataDocument, String> {
 
 }

@@ -2,7 +2,7 @@ package com.daninovac.batch.jobs.batch.configuration;
 
 
 import com.daninovac.batch.jobs.batch.decider.ImportTypeDecider;
-import com.daninovac.batch.jobs.batch.tasklet.CleanupRepositoryTasklet;
+import com.daninovac.batch.jobs.batch.tasklet.LoggerTasklet;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,13 +48,13 @@ public class BatchJobsConfiguration {
   @Bean
   public Job fileImportJob(
       ImportTypeDecider fileTypeDecider,
-      Step cleanupRepositoryStep,
+      Step loggerStep,
       Flow importCsvFlow,
       Flow importXmlFlow
   ) {
     return jobBuilderFactory.get("fileImportJob")
         .incrementer(new RunIdIncrementer())
-        .start(cleanupRepositoryStep)
+        .start(loggerStep)
         .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
         .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
         .end()
@@ -84,14 +84,14 @@ public class BatchJobsConfiguration {
     return new ImportTypeDecider();
   }
 
-  //todo i dont think it's needed
+  //todo just to start, should find another solution
   @Bean
-  public Step cleanupRepositoryStep(
+  public Step loggerStep(
       StepBuilderFactory stepBuilderFactory,
-      CleanupRepositoryTasklet cleanupRepositoryTasklet
+      LoggerTasklet loggerTasklet
   ) {
-    return stepBuilderFactory.get("cleanupRepositoryStep")
-        .tasklet(cleanupRepositoryTasklet)
+    return stepBuilderFactory.get("loggerStep")
+        .tasklet(loggerTasklet)
         .build();
   }
 

@@ -4,14 +4,11 @@ package com.daninovac.batch.jobs;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 
-@SpringBootApplication
-@EnableJpaRepositories
 @EnableBatchProcessing
-@EnableTransactionManagement
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class BatchJobsApplication {
 
   public static void main(String[] args) {
@@ -19,7 +16,6 @@ public class BatchJobsApplication {
     SpringApplication.run(BatchJobsApplication.class, args);
 
     //todo maybe make it async https://medium.com/@YounessBout/increase-spring-batch-performance-through-async-processing-e96fa5d90bbd
-    //todo move to no-sql
   }
 
 }

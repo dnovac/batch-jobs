@@ -1,13 +1,10 @@
 package com.daninovac.batch.jobs.batch.processor;
 
-import com.daninovac.batch.jobs.entity.FileData;
-import com.daninovac.batch.jobs.entity.XmlData;
+import com.daninovac.batch.jobs.entity.XmlDataDocument;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimaps;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -19,34 +16,37 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class XmlToCsvProcessor implements ItemProcessor<Object, XmlData> {
+public class XmlToCsvProcessor implements ItemProcessor<Object, XmlDataDocument> {
 
   private String filename;
 
   private FileTypeEnum fileType;
 
   @Override
-  public XmlData process(@SuppressWarnings("NullableProblems") Object data)
+  public XmlDataDocument process(@SuppressWarnings("NullableProblems") Object data)
       throws JobParametersInvalidException {
     return buildFileData(data);
   }
 
-  private XmlData buildFileData(Object data) throws JobParametersInvalidException {
-    if (data instanceof ArrayListMultimap) {
+  private XmlDataDocument buildFileData(Object data) throws JobParametersInvalidException {
+    if (data instanceof ImmutableListMultimap) {
       log.info("XML data is being processed...");
-      XmlData xmlData = new XmlData();
-      xmlData.setFilename(filename);
-      xmlData.setType(fileType.name());
 
-      //todo use immutable multimaps
-      ArrayListMultimap<String, Object> dataMultiMap = ArrayListMultimap.create();
-      ((ArrayListMultimap<String, Object>) data).forEach(dataMultiMap::put);
-      Map<String, List<Object>> mapOfProperties = Multimaps.asMap(dataMultiMap);
-      xmlData.setProperties(mapOfProperties);
-      return xmlData;
+      try {
+        ImmutableMap<String, Object> immutableMap = ((ImmutableListMultimap) data).asMap();
+        return XmlDataDocument.builder().filename(filename).type(fileType.name())
+            .properties(immutableMap).build();
+      } catch (Exception e) {
+        String errorMessage = "XML Properties could not be converted into multimap structure!";
+        log.error(errorMessage);
+        e.printStackTrace();
+
+        throw new JobParametersInvalidException(errorMessage);
+      }
     } else {
       String errorMessage = "Parsed XML data is not valid!";
       log.warn(errorMessage);
+
       throw new JobParametersInvalidException(errorMessage);
     }
   }

@@ -4,13 +4,12 @@ package com.daninovac.batch.jobs.service;
 import static com.daninovac.batch.jobs.utils.Constants.DIRECTORY_NAME;
 import static com.daninovac.batch.jobs.utils.Constants.TEMP_DIRECTORY;
 
-import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
-import com.daninovac.batch.jobs.repository.FileDataRepository;
+import com.daninovac.batch.jobs.repository.CsvDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.utils.FileUtils;
 import com.daninovac.batch.jobs.web.dto.DataDTO;
-import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -43,7 +42,7 @@ public class CsvJobService {
 
   private final JobExplorer jobExplorer;
 
-  private final FileDataRepository fileDataRepository;
+  private final CsvDataRepository csvDataRepository;
 
   public Long runJobCsvImport(
       String delimiter,
@@ -94,11 +93,11 @@ public class CsvJobService {
 
   /**
    * @param filename - uploaded file name
-   * @return DataDTO
+   * @return List of data from a specific filename
    */
   public List<DataDTO> findAllDataByFilename(String filename) {
 
-    List<FileData> dataByFilename = fileDataRepository.findByFilename(filename);
+    List<CsvDataDocument> dataByFilename = csvDataRepository.findByFilename(filename);
 
     return dataByFilename.stream()
         .map(fileData -> DataDTO.builder()
@@ -108,13 +107,15 @@ public class CsvJobService {
   }
 
   /**
-   * @return list of data properties
+   * It may be costly as time
+   *
+   * @return all data stored in csv collection
    */
-  public List<DataDTO> findAllByTypeCSV() {
+  public List<DataDTO> findAllCollection() {
 
-    List<FileData> dataByType = fileDataRepository.findByType(FileTypeEnum.CSV.name());
+    List<CsvDataDocument> csvDataDocuments = csvDataRepository.findAll();
 
-    return dataByType.stream()
+    return csvDataDocuments.parallelStream()
         .map(fileData -> DataDTO.builder()
             .data(fileData.getProperties())
             .filename(fileData.getFilename())

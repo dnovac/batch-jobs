@@ -1,7 +1,7 @@
 package com.daninovac.batch.jobs.batch.reader.csv;
 
 
-import com.daninovac.batch.jobs.entity.FileData;
+import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 @Component
 @StepScope
 @Slf4j
-public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
+public class CsvFlatItemReader extends FlatFileItemReader<CsvDataDocument> {
 
   public CsvFlatItemReader(
       @Value("#{jobParameters['path']}") String pathToFile,
@@ -26,20 +26,20 @@ public class CsvFlatItemReader extends FlatFileItemReader<FileData> {
   ) {
     super();
 
-    LineMapper<FileData> lineMapper = buildLineMapper(delimiter);
+    LineMapper<CsvDataDocument> lineMapper = buildLineMapper(delimiter);
     this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
     this.setResource(new FileSystemResource(pathToFile));
     this.setLinesToSkip(1);
     this.setLineMapper(lineMapper);
   }
 
-  private LineMapper<FileData> buildLineMapper(String delimiter) {
-    DefaultLineMapper<FileData> lineMapper = new DefaultLineMapper<>();
+  private LineMapper<CsvDataDocument> buildLineMapper(String delimiter) {
+    DefaultLineMapper<CsvDataDocument> lineMapper = new DefaultLineMapper<>();
 
     DelimitedLineTokenizer lineTokenizer = buildLineTokenizer(delimiter);
     lineMapper.setLineTokenizer(lineTokenizer);
 
-    FieldSetMapper<FileData> dataMapper = new CsvFieldSetMapper();
+    FieldSetMapper<CsvDataDocument> dataMapper = new CsvFieldSetMapper();
     lineMapper.setFieldSetMapper(dataMapper);
 
     return lineMapper;

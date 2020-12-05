@@ -1,14 +1,17 @@
 package com.daninovac.batch.jobs.batch.writer;
 
 
+import com.daninovac.batch.jobs.entity.CsvDataChunk;
 import com.daninovac.batch.jobs.entity.CsvDataDocument;
-import com.daninovac.batch.jobs.repository.CsvDataRepository;
+import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -18,7 +21,13 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CsvWriter implements ItemWriter<CsvDataDocument> {
 
-  private final CsvDataRepository fileDataRepository;
+  private final CsvChunkDataRepository chunkRepository;
+
+  @Value("#{jobParameters['filename']}")
+  private String filename;
+
+  @Value("#{jobParameters['file_extension']}")
+  private String type;
 
   @Override
   public void write(List<? extends CsvDataDocument> data) throws Exception {
@@ -29,6 +38,14 @@ public class CsvWriter implements ItemWriter<CsvDataDocument> {
     }
 
     log.info("Writing data chunk of {} from CSV import to database...", data.size());
-    fileDataRepository.saveAll(data);
+    List<CsvDataDocument> dataDocuments = new ArrayList<>(data);
+
+    CsvDataChunk chunkOfData = CsvDataChunk.builder()
+        .data(dataDocuments)
+        .filename(filename)
+        .type(type)
+        .build();
+    chunkRepository.save(chunkOfData);
   }
+
 }

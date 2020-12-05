@@ -4,15 +4,18 @@ package com.daninovac.batch.jobs.service;
 import static com.daninovac.batch.jobs.utils.Constants.DIRECTORY_NAME;
 import static com.daninovac.batch.jobs.utils.Constants.TEMP_DIRECTORY;
 
+import com.daninovac.batch.jobs.entity.CsvDataChunk;
 import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
-import com.daninovac.batch.jobs.repository.CsvDataRepository;
+import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.utils.FileUtils;
-import com.daninovac.batch.jobs.web.dto.DataDTO;
+import com.daninovac.batch.jobs.web.dto.FileDataDTO;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +45,7 @@ public class CsvJobService {
 
   private final JobExplorer jobExplorer;
 
-  private final CsvDataRepository csvDataRepository;
+  private final CsvChunkDataRepository csvDataChunkRepository;
 
   public Long runJobCsvImport(
       String delimiter,
@@ -92,35 +95,29 @@ public class CsvJobService {
   }
 
   /**
+   * It may cost you time, but heh...time is all we got - memories from lockdown (COVID-19)
+   *
    * @param filename - uploaded file name
    * @return List of data from a specific filename
    */
-  public List<DataDTO> findAllDataByFilename(String filename) {
+  public FileDataDTO findAllDataByFilename(String filename) {
 
-    List<CsvDataDocument> dataByFilename = csvDataRepository.findByFilename(filename);
+    log.info("Fetching all existent data from database for file: {} ...", filename);
+    List<CsvDataChunk> dataByFilenameList = csvDataChunkRepository.findByFilename(filename);
 
-    return dataByFilename.stream()
-        .map(fileData -> DataDTO.builder()
-            .data(fileData.getProperties())
-            .build())
-        .collect(Collectors.toList());
-  }
+    final List<Map<String, String>> propertiesMapList =
+        dataByFilenameList.stream()
+            .parallel()
+            .map(CsvDataChunk::getData)
+            .flatMap(List::stream)
+            .map(CsvDataDocument::getProperties)
+            .collect(Collectors.toList());
 
-  /**
-   * It may be costly as time
-   *
-   * @return all data stored in csv collection
-   */
-  public List<DataDTO> findAllCollection() {
-
-    List<CsvDataDocument> csvDataDocuments = csvDataRepository.findAll();
-
-    return csvDataDocuments.parallelStream()
-        .map(fileData -> DataDTO.builder()
-            .data(fileData.getProperties())
-            .filename(fileData.getFilename())
-            .build())
-        .collect(Collectors.toList());
+    return FileDataDTO.builder()
+        .data(propertiesMapList)
+        .type(FileTypeEnum.CSV.name())
+        .filename(filename)
+        .build();
   }
 
 

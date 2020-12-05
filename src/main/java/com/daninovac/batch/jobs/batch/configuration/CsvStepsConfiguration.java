@@ -1,6 +1,5 @@
 package com.daninovac.batch.jobs.batch.configuration;
 
-import com.daninovac.batch.jobs.batch.processor.CsvItemProcessor;
 import com.daninovac.batch.jobs.batch.writer.CsvWriter;
 import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import java.util.concurrent.Future;
@@ -9,6 +8,7 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.integration.async.AsyncItemProcessor;
 import org.springframework.batch.integration.async.AsyncItemWriter;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,14 +27,13 @@ public class CsvStepsConfiguration {
   @Bean
   public Step importCsvDataStep(
       FlatFileItemReader<CsvDataDocument> csvFlatItemReader,
-      CsvItemProcessor csvItemProcessor,
       AsyncItemWriter<CsvDataDocument> asyncCsvWriter,
       ThreadPoolTaskExecutor jobLauncherTaskExecutor
   ) {
     return stepBuilderFactory.get("importCsvDataStep")
         .<CsvDataDocument, Future<CsvDataDocument>>chunk(chunkSize)
         .reader(csvFlatItemReader)
-        .processor(asyncProcessor(csvItemProcessor, jobLauncherTaskExecutor))
+        .processor(asyncProcessor(jobLauncherTaskExecutor))
         .writer(asyncCsvWriter)
         .taskExecutor(jobLauncherTaskExecutor)
         .build();
@@ -50,14 +49,18 @@ public class CsvStepsConfiguration {
 
   @Bean
   public AsyncItemProcessor<CsvDataDocument, CsvDataDocument> asyncProcessor(
-      CsvItemProcessor csvItemProcessor,
       ThreadPoolTaskExecutor jobLauncherTaskExecutor
   ) {
     AsyncItemProcessor<CsvDataDocument, CsvDataDocument> asyncItemProcessor = new AsyncItemProcessor<>();
-    asyncItemProcessor.setDelegate(csvItemProcessor);
+    asyncItemProcessor.setDelegate(csvItemProcessor());
     asyncItemProcessor.setTaskExecutor(jobLauncherTaskExecutor);
 
     return asyncItemProcessor;
+  }
+
+  @Bean
+  public ItemProcessor<CsvDataDocument, CsvDataDocument> csvItemProcessor() {
+    return csvDataDocument -> csvDataDocument;
   }
 
 }

@@ -17,16 +17,22 @@ services:
     container_name: mongodb-batchjobs
     hostname: mongodb-batchjobs
     volumes:
-      - $HOME/data/mongodb-batchjobs:/data/db
-      - $HOME/data/mongodb-batchjobs:/data/bkp
+      - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
+      - ./.docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./.docker/mongodb/data/db/:/data/db/
+      - ./.docker/mongodb/data/log/:/var/log/mongodb/
+      - ./.docker/mongodb/data/mongodb-batchjobs:/data/bkp
+      #- $HOME/data/mongodb-batchjobs:/data/bkp
+      #- $HOME/data/mongodb-batchjobs:/data/db
     restart: always
-    #    env_file:
-    #      - .env
-    #      environment:
-    #        MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-    #        MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    #        MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    env_file:
+      - .env.dist
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
       - 27017:27017
-#    command: ["-f", "/etc/mongod.conf"] TODO: create script to create user/pass/db
+    command: [ "-f", "/etc/mongod.conf" ]
+# TODO: create script to create user/pass/db
 

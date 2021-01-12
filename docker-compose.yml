@@ -26,7 +26,7 @@ services:
       #- $HOME/data/mongodb-batchjobs:/data/db
     restart: always
     env_file:
-      - .env.dist
+      - .env
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
@@ -35,4 +35,4 @@ services:
       - 27017:27017
     command: [ "-f", "/etc/mongod.conf" ]
 # TODO: create script to create user/pass/db
-
+# docker-compose -f docker-compose.yml config    => to verify config

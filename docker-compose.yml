@@ -17,8 +17,8 @@ services:
     container_name: mongodb-batchjobs
     hostname: mongodb-batchjobs
     volumes:
-      - ./.docker/mongodb/mongod.conf:/etc/mongod.conf
-      - ./.docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+      - ./docker/mongodb/mongod.conf:/etc/mongod.conf
+      - ./docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
       - ./.docker/mongodb/data/db/:/data/db/
       - ./.docker/mongodb/data/log/:/var/log/mongodb/
       - ./.docker/mongodb/data/mongodb-batchjobs:/data/bkp

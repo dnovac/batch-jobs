@@ -19,7 +19,8 @@ public class LoggerTasklet implements Tasklet {
 
   @Override
   public RepeatStatus execute(
-      StepContribution stepContribution, ChunkContext chunkContext) {
+      @SuppressWarnings("NullableProblems") StepContribution stepContribution,
+      ChunkContext chunkContext) {
 
     final JobParameters jobParameters = chunkContext.getStepContext()
         .getStepExecution()

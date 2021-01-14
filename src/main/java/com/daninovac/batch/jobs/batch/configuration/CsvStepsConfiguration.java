@@ -33,7 +33,7 @@ public class CsvStepsConfiguration {
     return stepBuilderFactory.get("importCsvDataStep")
         .<CsvDataDocument, Future<CsvDataDocument>>chunk(chunkSize)
         .reader(csvFlatItemReader)
-        .processor(asyncProcessor(jobLauncherTaskExecutor))
+        .processor(asyncCsvProcessor(jobLauncherTaskExecutor))
         .writer(asyncCsvWriter)
         .taskExecutor(jobLauncherTaskExecutor)
         .build();
@@ -44,11 +44,12 @@ public class CsvStepsConfiguration {
       CsvWriter csvWriter) {
     AsyncItemWriter<CsvDataDocument> asyncItemWriter = new AsyncItemWriter<>();
     asyncItemWriter.setDelegate(csvWriter);
+
     return asyncItemWriter;
   }
 
   @Bean
-  public AsyncItemProcessor<CsvDataDocument, CsvDataDocument> asyncProcessor(
+  public AsyncItemProcessor<CsvDataDocument, CsvDataDocument> asyncCsvProcessor(
       ThreadPoolTaskExecutor jobLauncherTaskExecutor
   ) {
     AsyncItemProcessor<CsvDataDocument, CsvDataDocument> asyncItemProcessor = new AsyncItemProcessor<>();
@@ -60,6 +61,7 @@ public class CsvStepsConfiguration {
 
   @Bean
   public ItemProcessor<CsvDataDocument, CsvDataDocument> csvItemProcessor() {
+
     return csvDataDocument -> csvDataDocument;
   }
 

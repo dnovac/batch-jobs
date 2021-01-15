@@ -13,15 +13,16 @@ services:
     working_dir: /opt/app
 
   mongo:
-    image: mongo
+    image: mongo:latest
     container_name: mongodb-batchjobs
     hostname: mongodb-batchjobs
     volumes:
-      - ./docker/mongodb/mongod.conf:/etc/mongod.conf
-      - ./docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
-      - ./.docker/mongodb/data/db/:/data/db/
-      - ./.docker/mongodb/data/log/:/var/log/mongodb/
-      - ./.docker/mongodb/data/mongodb-batchjobs:/data/bkp
+      - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+#      - ./docker/mongodb/mongod.conf:/etc/mongod.conf
+#      - ./docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
+#      - ./.docker/mongodb/data/db/:/data/db/
+#      - ./.docker/mongodb/data/log/:/var/log/mongodb/
+#      - ./.docker/mongodb/data/mongodb-batchjobs:/data/bkp
       #- $HOME/data/mongodb-batchjobs:/data/bkp
       #- $HOME/data/mongodb-batchjobs:/data/db
     restart: always
@@ -32,7 +33,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
-      - 27017:27017
-    command: [ "-f", "/etc/mongod.conf" ]
+      - "27017:27017"
+    #command: [ "-f", "/etc/mongod.conf" ]
 # TODO: create script to create user/pass/db
 # docker-compose -f docker-compose.yml config    => to verify config

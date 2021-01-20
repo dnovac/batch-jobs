@@ -18,13 +18,10 @@ services:
     hostname: mongodb-batchjobs
     volumes:
       - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-#      - ./docker/mongodb/mongod.conf:/etc/mongod.conf
-#      - ./docker/mongodb/initdb.d/:/docker-entrypoint-initdb.d/
-#      - ./.docker/mongodb/data/db/:/data/db/
-#      - ./.docker/mongodb/data/log/:/var/log/mongodb/
-#      - ./.docker/mongodb/data/mongodb-batchjobs:/data/bkp
-      #- $HOME/data/mongodb-batchjobs:/data/bkp
-      #- $HOME/data/mongodb-batchjobs:/data/db
+      - ./docker/mongodb/mongod.conf:/etc/mongod.conf
+      - ./.docker/mongodb/data/db/:/data/db/
+      - ./.docker/mongodb/data/log/:/var/log/mongodb/
+      - ./.docker/mongodb/data/mongodb-batchjobs:/data/bkp
     restart: always
     env_file:
       - .env

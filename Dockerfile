@@ -16,7 +16,7 @@ WORKDIR $PROJECT_HOME
 #ADD target/batch-jobs-0.0.1-SNAPSHOT.jar batch-jobs.jar
 ENTRYPOINT ["java","-jar","batch-jobs.jar"]
 
-CMD ["java", "-Dspring.data.mongodb.uri=mongodb://batchjobs:27017/batchjobs-mongo","-Djava.security.egd=file:/dev/./urandom","-jar","./batch-jobs.jar"]
+CMD ["java", "-Dspring.data.mongodb.uri=mongodb://localhost:27017/batchjobs","-Djava.security.egd=file:/dev/./urandom","-jar","./batch-jobs.jar"]
 
 
 

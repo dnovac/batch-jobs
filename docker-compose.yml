@@ -1,24 +1,13 @@
 version: '3.1'
 
 services:
-  app:
-    build: ./
-    container_name: docker_batchjobs
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongo
-    working_dir: /opt/app
-    image: dg-docker-spring-http-alpine-j
-
   mongo:
     image: mongo
     container_name: docker_mongo
     hostname: mongo
     volumes:
+      - ./.docker/mongodb/data/db/:/data/db/
       - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-#      - ./.docker/mongodb/data/db/:/data/db/
     restart: always
     env_file:
       - .env
@@ -28,6 +17,16 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
       - "27017:27017"
-    #command: [ "-f", "/docker/mongod.conf" ]
-# TODO: create script to create user/pass/db
-# docker-compose -f docker-compose.yml config    => to verify config
+
+# TODO: make it work in container connected with mongodb
+#  app:
+#    build: ./
+#    container_name: docker_batchjobs
+#    restart: always
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - mongo
+#    working_dir: /opt/app
+#    image: dg-docker-spring-http-alpine-j
+

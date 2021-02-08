@@ -1,32 +1,33 @@
 version: '3.1'
 
 services:
-  app:
-    build: ./
-    container_name: batchjobs
-    #image: batch-jobs:latest
-    restart: always
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mongo
-    working_dir: /opt/app
-
   mongo:
     image: mongo
-    container_name: mongodb-batchjobs
-    hostname: mongodb-batchjobs
+    container_name: docker_mongo
+    hostname: mongo
     volumes:
-      - $HOME/data/mongodb-batchjobs:/data/db
-      - $HOME/data/mongodb-batchjobs:/data/bkp
+      - ./docker/mongodb/data/db/:/data/db/
+      - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     restart: always
-    #    env_file:
-    #      - .env
-    #      environment:
-    #        MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-    #        MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-    #        MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     ports:
-      - 27017:27017
-#    command: ["-f", "/etc/mongod.conf"] TODO: create script to create user/pass/db
+      - "27017:27017"
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+
+
+# TODO: make it work in another container connected with mongodb
+#  app:
+#    build: ./
+#    container_name: docker_batchjobs
+#    restart: always
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - mongo
+#    working_dir: /opt/app
+#    image: dg-docker-spring-http-alpine-j
 

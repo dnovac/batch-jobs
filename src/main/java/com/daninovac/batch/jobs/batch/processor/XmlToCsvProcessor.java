@@ -5,6 +5,7 @@ import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableMap;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -34,8 +35,12 @@ public class XmlToCsvProcessor implements ItemProcessor<Object, XmlDataDocument>
 
       try {
         ImmutableMap<String, Object> immutableMap = ((ImmutableListMultimap) data).asMap();
-        return XmlDataDocument.builder().filename(filename).type(fileType.name())
-            .properties(immutableMap).build();
+        return XmlDataDocument.builder()
+            .filename(filename)
+            .type(fileType.name())
+            .properties(immutableMap)
+            .createdAt(new Date())
+            .build();
       } catch (Exception e) {
         String errorMessage = "XML Properties could not be converted into multimap structure!";
         log.error(errorMessage);

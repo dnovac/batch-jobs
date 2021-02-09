@@ -27,38 +27,15 @@ public class XmlStepsConfiguration {
   @Bean
   public Step importXmlDataStep(
       XmlReader xmlReader,
-      AsyncItemWriter<XmlDataDocument> asyncXmlWriter,
-      XmlToCsvProcessor xmlProcessor,
-      ThreadPoolTaskExecutor jobLauncherTaskExecutor
+      XmlWriter xmlWriter,
+      XmlToCsvProcessor xmlProcessor
   ) {
     return stepBuilderFactory.get("importXmlDataStep")
-        .<Object, Future<XmlDataDocument>>chunk(chunkSize)
+        .<Object, XmlDataDocument>chunk(chunkSize)
         .reader(xmlReader)
-        .writer(asyncXmlWriter)
-        .processor(asyncXmlProcessor(xmlProcessor, jobLauncherTaskExecutor))
-        .taskExecutor(jobLauncherTaskExecutor)
+        .writer(xmlWriter)
+        .processor(xmlProcessor)
         .build();
-  }
-
-  @Bean
-  public AsyncItemWriter<XmlDataDocument> asyncXmlWriter(
-      XmlWriter xmlWriter) {
-    AsyncItemWriter<XmlDataDocument> asyncItemWriter = new AsyncItemWriter<>();
-    asyncItemWriter.setDelegate(xmlWriter);
-
-    return asyncItemWriter;
-  }
-
-  @Bean
-  public AsyncItemProcessor<Object, XmlDataDocument> asyncXmlProcessor(
-      XmlToCsvProcessor xmlProcessor,
-      ThreadPoolTaskExecutor jobLauncherTaskExecutor
-  ) {
-    AsyncItemProcessor<Object, XmlDataDocument> asyncItemProcessor = new AsyncItemProcessor<>();
-    asyncItemProcessor.setDelegate(xmlProcessor);
-    asyncItemProcessor.setTaskExecutor(jobLauncherTaskExecutor);
-
-    return asyncItemProcessor;
   }
 
 }

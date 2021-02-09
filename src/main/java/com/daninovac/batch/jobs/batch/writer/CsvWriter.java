@@ -5,6 +5,7 @@ import com.daninovac.batch.jobs.entity.CsvDataChunk;
 import com.daninovac.batch.jobs.entity.CsvDataDocument;
 import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ public class CsvWriter implements ItemWriter<CsvDataDocument> {
         .data(dataDocuments)
         .filename(filename)
         .type(type)
+        .createdAt(new Date())
         .build();
     chunkRepository.save(chunkOfData);
   }

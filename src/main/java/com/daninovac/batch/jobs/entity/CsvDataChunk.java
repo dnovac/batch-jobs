@@ -1,5 +1,6 @@
 package com.daninovac.batch.jobs.entity;
 
+import java.util.Date;
 import java.util.List;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,4 +23,6 @@ public class CsvDataChunk {
   private String type;
 
   private List<CsvDataDocument> data;
+
+  private Date createdAt;
 }

@@ -1,6 +1,7 @@
 package com.daninovac.batch.jobs.entity;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Date;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import lombok.Builder;
@@ -13,13 +14,16 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class XmlDataDocument {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  public String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public String id;
 
-  private String filename;
+    private String filename;
 
-  private String type;
+    private String type;
 
-  private ImmutableMap<String, Object> properties;
+    private ImmutableMap<String, Object> properties;
+
+    private Date createdAt;
+
 }

@@ -1,18 +1,18 @@
 package com.daninovac.batch.jobs.batch.writer;
 
 
+import com.daninovac.batch.jobs.entity.CsvDataChunk;
 import com.daninovac.batch.jobs.entity.CsvDataDocument;
-import com.daninovac.batch.jobs.repository.CsvDataRepository;
-import com.daninovac.batch.jobs.utils.Constants;
-import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.core.JobExecutionException;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ItemWriter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
@@ -22,30 +22,32 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CsvWriter implements ItemWriter<CsvDataDocument> {
 
-  private final CsvDataRepository fileDataRepository;
+  private final CsvChunkDataRepository chunkRepository;
 
+  @Value("#{jobParameters['filename']}")
   private String filename;
 
-  private FileTypeEnum filetype;
+  @Value("#{jobParameters['file_extension']}")
+  private String type;
 
   @Override
-  public void write(List<? extends CsvDataDocument> data) {
+  public void write(List<? extends CsvDataDocument> data) throws Exception {
+
+    if (data.isEmpty()) {
+      log.error("List to write is empty!");
+      throw new JobExecutionException("Cannot write empty list!");
+    }
 
     log.info("Writing data chunk of {} from CSV import to database...", data.size());
-    data.forEach(row -> {
-      row.setFilename(filename);
-      row.setType(filetype.name());
-    });
+    List<CsvDataDocument> dataDocuments = new ArrayList<>(data);
 
-    fileDataRepository.saveAll(data);
-  }
-
-  @BeforeStep
-  public void fillParameters(final StepExecution stepExecution) {
-
-    JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
-    this.filename = parameters.getString(Constants.FILENAME);
-    this.filetype = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
+    CsvDataChunk chunkOfData = CsvDataChunk.builder()
+        .data(dataDocuments)
+        .filename(filename)
+        .type(type)
+        .createdAt(new Date())
+        .build();
+    chunkRepository.save(chunkOfData);
   }
 
 }

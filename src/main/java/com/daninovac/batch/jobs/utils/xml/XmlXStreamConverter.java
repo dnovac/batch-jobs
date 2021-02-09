@@ -26,7 +26,8 @@ public class XmlXStreamConverter implements Converter {
     //noinspection rawtypes
     AbstractMap map = (AbstractMap) value;
     for (Object object : map.entrySet()) {
-      @SuppressWarnings("rawtypes") Map.Entry entry = (Map.Entry) object;
+      @SuppressWarnings("rawtypes")
+      Map.Entry entry = (Map.Entry) object;
       writer.startNode(entry.getKey().toString());
       Object val = entry.getValue();
 

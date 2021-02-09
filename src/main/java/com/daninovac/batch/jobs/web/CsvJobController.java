@@ -3,9 +3,8 @@ package com.daninovac.batch.jobs.web;
 
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.CsvJobService;
-import com.daninovac.batch.jobs.web.dto.DataDTO;
+import com.daninovac.batch.jobs.web.dto.FileDataDTO;
 import java.io.IOException;
-import java.util.List;
 import javax.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,15 +48,9 @@ public class CsvJobController {
   }
 
   @GetMapping("/data/{filename}")
-  public List<DataDTO> findDataByFilename(@PathVariable String filename) {
+  public FileDataDTO findDataByFilename(@PathVariable String filename) {
 
     return csvJobService.findAllDataByFilename(filename);
-  }
-
-  @GetMapping("/data")
-  public List<DataDTO> findAll() {
-
-    return csvJobService.findAllCollection();
   }
 
   @GetMapping("/status/{id}")

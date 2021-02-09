@@ -27,7 +27,6 @@ public class CsvFlatItemReader extends FlatFileItemReader<CsvDataDocument> {
     super();
 
     LineMapper<CsvDataDocument> lineMapper = buildLineMapper(delimiter);
-    this.setRecordSeparatorPolicy(new DefaultRecordSeparatorPolicy());
     this.setResource(new FileSystemResource(pathToFile));
     this.setLinesToSkip(1);
     this.setLineMapper(lineMapper);
@@ -58,7 +57,7 @@ public class CsvFlatItemReader extends FlatFileItemReader<CsvDataDocument> {
 
 
   /**
-   * dynamic way of fetching headers of the csv document
+   * Dynamic way of fetching headers of the csv document
    *
    * @param delimiter     delimiter for headers
    * @param lineTokenizer lineTokenizer

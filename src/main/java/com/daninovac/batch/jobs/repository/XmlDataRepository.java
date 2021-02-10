@@ -1,6 +1,7 @@
 package com.daninovac.batch.jobs.repository;
 
 import com.daninovac.batch.jobs.entity.XmlDataDocument;
+import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,5 +11,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface XmlDataRepository extends MongoRepository<XmlDataDocument, String> {
+
+    List<XmlDataDocument> findByFilename(String filename);
+
 
 }

@@ -10,7 +10,7 @@ import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.utils.FileUtils;
-import com.daninovac.batch.jobs.web.dto.FileDataDTO;
+import com.daninovac.batch.jobs.web.dto.CsvFileDataDTO;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import java.io.File;
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class CsvJobService {
       return jobExecution.getStatus();
     }
     log.warn("Job with id {} does not exist", id);
-    return null;
+    return BatchStatus.UNKNOWN;
   }
 
   /**
@@ -100,7 +100,7 @@ public class CsvJobService {
    * @param filename - uploaded file name
    * @return List of data from a specific filename
    */
-  public FileDataDTO findAllDataByFilename(String filename) {
+  public CsvFileDataDTO findAllDataByFilename(String filename) {
 
     log.info("Fetching all existent data from database for file: {} ...", filename);
     List<CsvDataChunk> dataByFilenameList = csvDataChunkRepository.findByFilename(filename);
@@ -113,7 +113,7 @@ public class CsvJobService {
             .map(CsvDataDocument::getProperties)
             .collect(Collectors.toList());
 
-    return FileDataDTO.builder()
+    return CsvFileDataDTO.builder()
         .data(propertiesMapList)
         .type(FileTypeEnum.CSV.name())
         .filename(filename)

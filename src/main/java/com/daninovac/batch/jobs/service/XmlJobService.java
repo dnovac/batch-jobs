@@ -6,17 +6,28 @@ import static com.daninovac.batch.jobs.utils.FileUtils.getFileExtension;
 import static com.daninovac.batch.jobs.utils.FileUtils.getFilename;
 import static com.daninovac.batch.jobs.utils.FileUtils.saveFileInTemporaryFolder;
 
+import com.daninovac.batch.jobs.entity.XmlDataDocument;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
+import com.daninovac.batch.jobs.repository.XmlDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import com.daninovac.batch.jobs.web.dto.XmlFileDataDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -30,32 +41,74 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class XmlJobService {
 
-  private final Job fileImportJob;
+    private final Job fileImportJob;
 
-  private final JobLauncher jobLauncher;
+    private final JobLauncher jobLauncher;
 
-  public Long runJobXmlImport(
-      MultipartFile multipartFile
-  )
-      throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-      JobParametersInvalidException, InvalidFileExtensionException {
+    private final JobExplorer jobExplorer;
 
-    File jobsTempDirectory = new File(TEMP_DIRECTORY, DIRECTORY_NAME);
-    File file = saveFileInTemporaryFolder(jobsTempDirectory, multipartFile);
-    String filename = getFilename(multipartFile);
-    String fileExtension = getFileExtension(filename).name();
+    private final XmlDataRepository repository;
 
-    JobParameters jobParameters = new JobParametersBuilder()
-        .addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
-        .addString(Constants.FILENAME, filename)
-        .addString(Constants.FILE_EXTENSION, fileExtension)
-        .addLong(Constants.TIME, System.currentTimeMillis())
-        .toJobParameters();
+    public Long runJobXmlImport(
+        MultipartFile multipartFile
+    )
+        throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+        JobParametersInvalidException, InvalidFileExtensionException {
 
-    JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
+        File jobsTempDirectory = new File(TEMP_DIRECTORY, DIRECTORY_NAME);
+        File file = saveFileInTemporaryFolder(jobsTempDirectory, multipartFile);
+        String filename = getFilename(multipartFile);
+        String fileExtension = getFileExtension(filename).name();
 
-    return jobExecution.getId();
-  }
+        JobParameters jobParameters = new JobParametersBuilder()
+            .addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
+            .addString(Constants.FILENAME, filename)
+            .addString(Constants.FILE_EXTENSION, fileExtension)
+            .addLong(Constants.TIME, System.currentTimeMillis())
+            .toJobParameters();
+
+        JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
+
+        return jobExecution.getId();
+    }
+
+    /**
+     *
+     * @param filename
+     * @return DTO with fetched data for a specific filename
+     */
+    public XmlFileDataDTO findAllDataByFilename(String filename) {
+        log.info("Fetching all existent data from database for file: {} ...", filename);
+
+        //todo here crash boom bang because of deserialization
+        final List<XmlDataDocument> xmlDataByFilename = repository.findByFilename(filename);
+
+        final List<ImmutableMap<String, Object>> dataMapList =
+            xmlDataByFilename.stream()
+                .parallel()
+                .map(XmlDataDocument::getProperties)
+                .collect(Collectors.toList());
+
+        return XmlFileDataDTO.builder()
+            .data(dataMapList)
+            .filename(filename)
+            .type(FileTypeEnum.XML.name())
+            .build();
+    }
+
+    /**
+     * @param id of the job to search for
+     * @return COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;
+     */
+    public BatchStatus getJobStatus(Long id) {
+
+        JobExecution jobExecution = jobExplorer.getJobExecution(id);
+        if (jobExecution != null) {
+            return jobExecution.getStatus();
+        }
+        log.warn("Job with id {} does not exist", id);
+        return BatchStatus.UNKNOWN;
+    }
 
 
 }

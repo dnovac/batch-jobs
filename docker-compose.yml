@@ -7,7 +7,6 @@ services:
     hostname: mongo
     volumes:
       - mongodata:/data/db
-      #- ./docker/mongodb/data/db/:/data/db/
       - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     restart: always
     ports:

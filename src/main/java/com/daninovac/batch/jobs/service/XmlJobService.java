@@ -12,8 +12,6 @@ import com.daninovac.batch.jobs.repository.XmlDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import com.daninovac.batch.jobs.web.dto.XmlFileDataDTO;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +71,6 @@ public class XmlJobService {
     }
 
     /**
-     *
      * @param filename
      * @return DTO with fetched data for a specific filename
      */

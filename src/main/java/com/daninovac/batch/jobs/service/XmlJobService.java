@@ -12,13 +12,13 @@ import com.daninovac.batch.jobs.repository.XmlDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import com.daninovac.batch.jobs.web.dto.XmlFileDataDTO;
-import com.google.common.collect.ImmutableMap;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -77,17 +77,16 @@ public class XmlJobService {
     public XmlFileDataDTO findAllDataByFilename(String filename) {
         log.info("Fetching all existent data from database for file: {} ...", filename);
 
-        //todo here crash boom bang because of deserialization
         final List<XmlDataDocument> xmlDataByFilename = repository.findByFilename(filename);
 
-        final List<ImmutableMap<String, Object>> dataMapList =
+        final List<Document> properties =
             xmlDataByFilename.stream()
                 .parallel()
                 .map(XmlDataDocument::getProperties)
                 .collect(Collectors.toList());
 
         return XmlFileDataDTO.builder()
-            .data(dataMapList)
+            .data(properties)
             .filename(filename)
             .type(FileTypeEnum.XML.name())
             .build();

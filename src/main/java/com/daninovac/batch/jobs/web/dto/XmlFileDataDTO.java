@@ -1,12 +1,12 @@
 package com.daninovac.batch.jobs.web.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.bson.Document;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,5 +19,5 @@ public class XmlFileDataDTO {
 
     private String type;
 
-    private List<ImmutableMap<String, Object>> data;
+    private List<Document> data;
 }

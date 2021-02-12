@@ -18,48 +18,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class XmlToCsvProcessor implements ItemProcessor<Object, XmlDataDocument> {
 
-    private String filename;
+  private String filename;
 
-    private FileTypeEnum fileType;
+  private FileTypeEnum fileType;
 
-    @Override
-    public XmlDataDocument process(@SuppressWarnings("NullableProblems") Object data)
-        throws JobParametersInvalidException {
-        return buildFileData(data);
+  @Override
+  public XmlDataDocument process(@SuppressWarnings("NullableProblems") Object data)
+    throws JobParametersInvalidException {
+    return buildFileData(data);
+  }
+
+  private XmlDataDocument buildFileData(Object data) throws JobParametersInvalidException {
+    if (data instanceof Document) {
+      log.info("XML data is being processed...");
+
+      try {
+        return XmlDataDocument.builder()
+          .filename(filename)
+          .type(fileType.name())
+          .properties((Document) data)
+          .createdAt(new Date())
+          .build();
+      } catch (Exception e) {
+        String errorMessage = "XML Properties could not be converted into multimap structure!";
+        log.error(errorMessage);
+        e.printStackTrace();
+
+        throw new JobParametersInvalidException(errorMessage);
+      }
+    } else {
+      String errorMessage = "Parsed XML data is not valid!";
+      log.warn(errorMessage);
+
+      throw new JobParametersInvalidException(errorMessage);
     }
+  }
 
-    private XmlDataDocument buildFileData(Object data) throws JobParametersInvalidException {
-        if (data instanceof Document) {
-            log.info("XML data is being processed...");
+  @BeforeStep
+  public void fillParameters(final StepExecution stepExecution) {
 
-            try {
-                return XmlDataDocument.builder()
-                    .filename(filename)
-                    .type(fileType.name())
-                    .properties((Document) data)
-                    .createdAt(new Date())
-                    .build();
-            } catch (Exception e) {
-                String errorMessage = "XML Properties could not be converted into multimap structure!";
-                log.error(errorMessage);
-                e.printStackTrace();
-
-                throw new JobParametersInvalidException(errorMessage);
-            }
-        } else {
-            String errorMessage = "Parsed XML data is not valid!";
-            log.warn(errorMessage);
-
-            throw new JobParametersInvalidException(errorMessage);
-        }
-    }
-
-    @BeforeStep
-    public void fillParameters(final StepExecution stepExecution) {
-
-        JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
-        this.filename = parameters.getString(Constants.FILENAME);
-        this.fileType = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
-    }
+    JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
+    this.filename = parameters.getString(Constants.FILENAME);
+    this.fileType = FileTypeEnum.valueOf(parameters.getString(Constants.FILE_EXTENSION));
+  }
 
 }

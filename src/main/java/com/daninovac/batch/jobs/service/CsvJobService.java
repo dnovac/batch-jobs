@@ -37,7 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class CsvJobService {
+public class CsvJobService implements IJobService{
 
   private final Job fileImportJob;
 
@@ -77,13 +77,6 @@ public class CsvJobService {
   }
 
 
-  /**
-   * Fetch batch job status based on job id
-   *
-   * @param id of the job
-   * @return Batch Status [COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED,
-   * UNKNOWN]
-   */
   public BatchStatus getJobStatus(Long id) {
 
     JobExecution jobExecution = jobExplorer.getJobExecution(id);

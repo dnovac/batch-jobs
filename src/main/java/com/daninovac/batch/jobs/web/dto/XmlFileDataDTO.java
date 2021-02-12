@@ -15,9 +15,9 @@ import org.bson.Document;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class XmlFileDataDTO {
 
-    private String filename;
+  private String filename;
 
-    private String type;
+  private String type;
 
-    private List<Document> data;
+  private List<Document> data;
 }

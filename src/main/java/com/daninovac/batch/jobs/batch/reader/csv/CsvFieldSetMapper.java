@@ -25,10 +25,10 @@ public class CsvFieldSetMapper implements FieldSetMapper<CsvDataDocument> {
 
     List<String> columnNames = Arrays.asList(fieldSet.getNames());
     ConcurrentMap<String, String> columnProperties = columnNames.parallelStream()
-        .collect(Collectors.toConcurrentMap(name -> name,
-            fieldSet::readString,
-            (prop1, prop2) -> prop1
-        ));
+      .collect(Collectors.toConcurrentMap(name -> name,
+        fieldSet::readString,
+        (prop1, prop2) -> prop1
+      ));
 
     return CsvDataDocument.builder().properties(columnProperties).build();
   }

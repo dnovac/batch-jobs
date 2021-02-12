@@ -54,8 +54,6 @@ public class BatchJobsConfiguration {
   ) {
     return jobBuilderFactory
         .get("fileImportJob")
-        .incrementer(new RunIdIncrementer())
-        //TODO: create a new flow to skip loggerStep: .flow(Step step)
         .start(loggerStep)
         .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
         .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
@@ -86,7 +84,6 @@ public class BatchJobsConfiguration {
     return new ImportTypeDecider();
   }
 
-  //todo just to start, should find another solution
   @Bean
   public Step loggerStep(
       StepBuilderFactory stepBuilderFactory,

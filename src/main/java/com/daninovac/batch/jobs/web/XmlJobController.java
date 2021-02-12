@@ -33,30 +33,30 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("xml")
 public class XmlJobController {
 
-    private final XmlJobService service;
+  private final XmlJobService service;
 
-    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Long> triggerImportCsvJob(
-        @RequestParam MultipartFile file
-    )
-        throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-        IOException, JobParametersInvalidException, InvalidFileExtensionException {
+  @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ResponseEntity<Long> triggerImportCsvJob(
+    @RequestParam MultipartFile file
+  )
+    throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+    IOException, JobParametersInvalidException, InvalidFileExtensionException {
 
-        log.info("Starting job XML-Import for file: [{}] bytes", file.getSize());
-        Long jobId = service.runJobXmlImport(file);
+    log.info("Starting job XML-Import for file: [{}] bytes", file.getSize());
+    Long jobId = service.runJobXmlImport(file);
 
-        return ResponseEntity.accepted().body(jobId);
-    }
+    return ResponseEntity.accepted().body(jobId);
+  }
 
-    @GetMapping("/data/{filename}")
-    public XmlFileDataDTO findDataByFilename(@PathVariable String filename) {
-        return service.findAllDataByFilename(filename);
-    }
+  @GetMapping("/data/{filename}")
+  public XmlFileDataDTO findDataByFilename(@PathVariable String filename) {
+    return service.findAllDataByFilename(filename);
+  }
 
-    @GetMapping("/status/{id}")
-    public BatchStatus getJobStatus(@PathVariable("id") Long jobId) {
+  @GetMapping("/status/{id}")
+  public BatchStatus getJobStatus(@PathVariable("id") Long jobId) {
 
-        return service.getJobStatus(jobId);
-    }
+    return service.getJobStatus(jobId);
+  }
 
 }

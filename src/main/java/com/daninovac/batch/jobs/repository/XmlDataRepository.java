@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface XmlDataRepository extends MongoRepository<XmlDataDocument, String> {
 
-    List<XmlDataDocument> findByFilename(String filename);
+  List<XmlDataDocument> findByFilename(String filename);
 
 
 }

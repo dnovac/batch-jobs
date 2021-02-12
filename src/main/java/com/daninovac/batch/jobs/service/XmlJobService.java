@@ -37,74 +37,71 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class XmlJobService {
+public class XmlJobService implements IJobService{
 
-    private final Job fileImportJob;
+  private final Job fileImportJob;
 
-    private final JobLauncher jobLauncher;
+  private final JobLauncher jobLauncher;
 
-    private final JobExplorer jobExplorer;
+  private final JobExplorer jobExplorer;
 
-    private final XmlDataRepository repository;
+  private final XmlDataRepository repository;
 
-    public Long runJobXmlImport(
-        MultipartFile multipartFile
-    )
-        throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-        JobParametersInvalidException, InvalidFileExtensionException {
+  public Long runJobXmlImport(
+    MultipartFile multipartFile
+  )
+    throws IOException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+    JobParametersInvalidException, InvalidFileExtensionException {
 
-        File jobsTempDirectory = new File(TEMP_DIRECTORY, DIRECTORY_NAME);
-        File file = saveFileInTemporaryFolder(jobsTempDirectory, multipartFile);
-        String filename = getFilename(multipartFile);
-        String fileExtension = getFileExtension(filename).name();
+    File jobsTempDirectory = new File(TEMP_DIRECTORY, DIRECTORY_NAME);
+    File file = saveFileInTemporaryFolder(jobsTempDirectory, multipartFile);
+    String filename = getFilename(multipartFile);
+    String fileExtension = getFileExtension(filename).name();
 
-        JobParameters jobParameters = new JobParametersBuilder()
-            .addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
-            .addString(Constants.FILENAME, filename)
-            .addString(Constants.FILE_EXTENSION, fileExtension)
-            .addLong(Constants.TIME, System.currentTimeMillis())
-            .toJobParameters();
+    JobParameters jobParameters = new JobParametersBuilder()
+      .addString(Constants.PATH_TO_UPLOADED_FILE, file.getAbsolutePath())
+      .addString(Constants.FILENAME, filename)
+      .addString(Constants.FILE_EXTENSION, fileExtension)
+      .addLong(Constants.TIME, System.currentTimeMillis())
+      .toJobParameters();
 
-        JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
+    JobExecution jobExecution = jobLauncher.run(fileImportJob, jobParameters);
 
-        return jobExecution.getId();
+    return jobExecution.getId();
+  }
+
+  /**
+   * @param filename
+   * @return DTO with fetched data for a specific filename
+   */
+  public XmlFileDataDTO findAllDataByFilename(String filename) {
+    log.info("Fetching all existent data from database for file: {} ...", filename);
+
+    final List<XmlDataDocument> xmlDataByFilename = repository.findByFilename(filename);
+
+    final List<Document> properties =
+      xmlDataByFilename.stream()
+        .parallel()
+        .map(XmlDataDocument::getProperties)
+        .collect(Collectors.toList());
+
+    return XmlFileDataDTO.builder()
+      .data(properties)
+      .filename(filename)
+      .type(FileTypeEnum.XML.name())
+      .build();
+  }
+
+
+  public BatchStatus getJobStatus(Long id) {
+
+    JobExecution jobExecution = jobExplorer.getJobExecution(id);
+    if (jobExecution != null) {
+      return jobExecution.getStatus();
     }
-
-    /**
-     * @param filename
-     * @return DTO with fetched data for a specific filename
-     */
-    public XmlFileDataDTO findAllDataByFilename(String filename) {
-        log.info("Fetching all existent data from database for file: {} ...", filename);
-
-        final List<XmlDataDocument> xmlDataByFilename = repository.findByFilename(filename);
-
-        final List<Document> properties =
-            xmlDataByFilename.stream()
-                .parallel()
-                .map(XmlDataDocument::getProperties)
-                .collect(Collectors.toList());
-
-        return XmlFileDataDTO.builder()
-            .data(properties)
-            .filename(filename)
-            .type(FileTypeEnum.XML.name())
-            .build();
-    }
-
-    /**
-     * @param id of the job to search for
-     * @return COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;
-     */
-    public BatchStatus getJobStatus(Long id) {
-
-        JobExecution jobExecution = jobExplorer.getJobExecution(id);
-        if (jobExecution != null) {
-            return jobExecution.getStatus();
-        }
-        log.warn("Job with id {} does not exist", id);
-        return BatchStatus.UNKNOWN;
-    }
+    log.warn("Job with id {} does not exist", id);
+    return BatchStatus.UNKNOWN;
+  }
 
 
 }

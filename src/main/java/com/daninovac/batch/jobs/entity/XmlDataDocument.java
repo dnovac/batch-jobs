@@ -1,6 +1,5 @@
 package com.daninovac.batch.jobs.entity;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.Date;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,7 +21,7 @@ public class XmlDataDocument {
 
     private String type;
 
-    private ImmutableMap<String, Object> properties;
+    private org.bson.Document properties;
 
     private Date createdAt;
 

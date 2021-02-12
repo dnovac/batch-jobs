@@ -1,8 +1,5 @@
 package com.daninovac.batch.jobs.utils.xml;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
@@ -10,6 +7,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.AbstractMap;
 import java.util.Map;
+import org.bson.Document;
 
 public class XmlXStreamConverter implements Converter {
 
@@ -21,7 +19,7 @@ public class XmlXStreamConverter implements Converter {
 
   @Override
   public void marshal(Object value, HierarchicalStreamWriter writer,
-      MarshallingContext context) {
+    MarshallingContext context) {
 
     //noinspection rawtypes
     AbstractMap map = (AbstractMap) value;
@@ -42,11 +40,11 @@ public class XmlXStreamConverter implements Converter {
   }
 
   @Override
-  public ImmutableMultimap<String, Object> unmarshal(
-      HierarchicalStreamReader reader,
-      UnmarshallingContext unmarshallingContext) {
+  public Document unmarshal(
+    HierarchicalStreamReader reader,
+    UnmarshallingContext unmarshallingContext) {
 
-    Multimap<String, Object> map = ArrayListMultimap.create();
+    Document propertiesBSON = new Document();
     while (reader.hasMoreChildren()) {
       reader.moveDown();
 
@@ -57,10 +55,10 @@ public class XmlXStreamConverter implements Converter {
       } else {
         value = reader.getValue();
       }
-      map.put(key, value);
+      propertiesBSON.append(key, value);
       reader.moveUp();
     }
-    return ImmutableMultimap.copyOf(map);
+    return propertiesBSON;
   }
 
 

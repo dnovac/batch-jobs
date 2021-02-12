@@ -3,10 +3,9 @@ package com.daninovac.batch.jobs.batch.processor;
 import com.daninovac.batch.jobs.entity.XmlDataDocument;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
-import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.StepExecution;
@@ -25,22 +24,21 @@ public class XmlToCsvProcessor implements ItemProcessor<Object, XmlDataDocument>
 
   @Override
   public XmlDataDocument process(@SuppressWarnings("NullableProblems") Object data)
-      throws JobParametersInvalidException {
+    throws JobParametersInvalidException {
     return buildFileData(data);
   }
 
   private XmlDataDocument buildFileData(Object data) throws JobParametersInvalidException {
-    if (data instanceof ImmutableListMultimap) {
+    if (data instanceof Document) {
       log.info("XML data is being processed...");
 
       try {
-        ImmutableMap<String, Object> immutableMap = ((ImmutableListMultimap) data).asMap();
         return XmlDataDocument.builder()
-            .filename(filename)
-            .type(fileType.name())
-            .properties(immutableMap)
-            .createdAt(new Date())
-            .build();
+          .filename(filename)
+          .type(fileType.name())
+          .properties((Document) data)
+          .createdAt(new Date())
+          .build();
       } catch (Exception e) {
         String errorMessage = "XML Properties could not be converted into multimap structure!";
         log.error(errorMessage);

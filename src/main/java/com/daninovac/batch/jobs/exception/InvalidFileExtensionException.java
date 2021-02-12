@@ -1,9 +1,6 @@
 package com.daninovac.batch.jobs.exception;
 
-import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import lombok.extern.slf4j.Slf4j;
-
-import static com.daninovac.batch.jobs.web.dto.FileTypeEnum.getNames;
 
 
 /**

@@ -4,6 +4,7 @@ package com.daninovac.batch.jobs.web;
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.CsvJobService;
 import com.daninovac.batch.jobs.web.dto.CsvFileDataDTO;
+import com.daninovac.batch.jobs.web.dto.ResponseBodyDTO;
 import java.io.IOException;
 import javax.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,19 +32,19 @@ public class CsvJobController {
 
   private final CsvJobService csvJobService;
 
-  @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<Long> triggerImportCsvJob(
-      @RequestParam @Size(max = 1) String delimiter,
-      @RequestParam MultipartFile file
+  @PostMapping(value = "/import")
+  public ResponseEntity<ResponseBodyDTO> triggerImportCsvJob(
+    @RequestParam @Size(max = 1) String delimiter,
+    @RequestParam MultipartFile file
   )
-      throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-      IOException, JobParametersInvalidException, InvalidFileExtensionException {
+    throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+    IOException, JobParametersInvalidException, InvalidFileExtensionException {
 
     log.info("Starting job CSV-Import for file: [{}] bytes and delimiter [{}]", file.getSize(),
-        delimiter);
+      delimiter);
     Long jobId = csvJobService.runJobCsvImport(delimiter, file);
 
-    return ResponseEntity.accepted().body(jobId);
+    return ResponseEntity.accepted().body(new ResponseBodyDTO(jobId));
   }
 
   @GetMapping("/data/{filename}")

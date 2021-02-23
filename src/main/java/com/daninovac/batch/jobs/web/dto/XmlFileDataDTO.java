@@ -5,10 +5,8 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.bson.Document;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Data

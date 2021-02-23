@@ -6,12 +6,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.daninovac.batch.jobs.service.CsvJobService;
-import com.daninovac.batch.jobs.web.dto.CsvFileDataDTO;
+import com.daninovac.batch.jobs.service.XmlJobService;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import com.daninovac.batch.jobs.web.dto.XmlFileDataDTO;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import org.bson.Document;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.batch.core.BatchStatus;
@@ -24,57 +23,55 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(CsvJobController.class)
-public class CsvJobControllerTest {
+@WebMvcTest(XmlJobController.class)
+public class XmlJobControllerTest {
 
   @Autowired
   private MockMvc mockMvc;
 
   @MockBean
-  private CsvJobService service;
+  private XmlJobService service;
 
   @Test
-  public void givenValidForm_whenFileUploaded_thenReturnStatus202WithJobId()
+  public void givenValidFile_whenFileUploaded_thenReturnStatus202WithJobId()
     throws Exception {
 
     MockMultipartFile mockMultipartFile = new MockMultipartFile(
       "file",
-      "file.csv",
+      "file.xml",
       MediaType.MULTIPART_FORM_DATA_VALUE,
-      "Testing;For;A;Better;World".getBytes()
+      "<tag>something</tag><anotherTag>hello</anotherTag>".getBytes()
     );
 
-    given(service.runJobCsvImport(";", mockMultipartFile)).willReturn(22L);
+    given(service.runJobXmlImport(mockMultipartFile)).willReturn(999L);
 
-    mockMvc.perform(multipart("/csv/import")
-      .file(mockMultipartFile)
-      .param("delimiter", ";"))
+    mockMvc.perform(multipart("/xml/import")
+      .file(mockMultipartFile))
       .andExpect(status().is2xxSuccessful())
       .andExpect(status().is(202))
       .andExpect(jsonPath("$.jobId").exists())
       .andExpect(jsonPath("$.jobId").isNumber())
-      .andExpect(jsonPath("$.jobId").value(22));
+      .andExpect(jsonPath("$.jobId").value(999L));
   }
 
   @Test
-  public void whenFindDataByFilename_thenReturnStatus200WithContent()
+  public void givenFilename_whenFindDataByFilename_thenReturnStatus200WithContent()
     throws Exception {
 
-    final String filename = "test_filename.test";
-    Map<String, String> dataMap = new HashMap<String, String>() {{
-      put("name", "testingStuff");
-      put("title", "justTests");
-      put("another_data", "anotherTime");
-    }};
+    final String filename = "test_xml_filename.xml";
+    Document dataDoc = new Document();
+    dataDoc.append("tag", "something");
+    dataDoc.append("anotherTag", "hello");
 
-    CsvFileDataDTO csvFileDataDTO = CsvFileDataDTO.builder()
+    XmlFileDataDTO xmlData = XmlFileDataDTO.builder()
       .filename(filename)
-      .type(FileTypeEnum.CSV.name())
-      .data(Arrays.asList(dataMap)).build();
+      .type(FileTypeEnum.XML.name())
+      .data(Arrays.asList(dataDoc))
+      .build();
 
-    given(service.findAllDataByFilename(filename)).willReturn(csvFileDataDTO);
+    given(service.findAllDataByFilename(filename)).willReturn(xmlData);
 
-    mockMvc.perform(get("/csv/data/" + filename))
+    mockMvc.perform(get("/xml/data/" + filename))
       .andExpect(status().is2xxSuccessful())
       .andExpect(status().is(200))
       .andExpect(jsonPath("$.filename").exists())
@@ -84,16 +81,16 @@ public class CsvJobControllerTest {
   }
 
   @Test
-  public void whenGetJobStatus_thenReturnStatus200WithJobStatus()
+  public void givenJobId_whenGetJobStatus_thenReturnStatus200WithJobStatus()
     throws Exception {
 
-    given(service.getJobStatus(0L)).willReturn(BatchStatus.STARTING);
+    given(service.getJobStatus(500L)).willReturn(BatchStatus.COMPLETED);
 
-    mockMvc.perform(get("/csv/status/{id}", 0))
+    mockMvc.perform(get("/xml/status/{id}", 500L))
       .andExpect(status().is2xxSuccessful())
       .andExpect(status().is(200))
       .andExpect(jsonPath("$").exists())
-      .andExpect(jsonPath("$").value(BatchStatus.STARTING.toString()));
+      .andExpect(jsonPath("$").value(BatchStatus.COMPLETED.toString()));
   }
 
 }

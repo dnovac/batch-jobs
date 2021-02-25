@@ -1,13 +1,16 @@
 package com.daninovac.batch.jobs.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.daninovac.batch.jobs.entity.CsvDataChunk;
 import com.daninovac.batch.jobs.entity.CsvDataDocument;
+import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
 import com.daninovac.batch.jobs.web.dto.CsvFileDataDTO;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,7 +22,14 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CsvJobServiceTest {
@@ -33,9 +43,30 @@ public class CsvJobServiceTest {
   @Mock
   private JobExplorer jobExplorer;
 
+  @Mock
+  private JobLauncher jobLauncher;
+
   @InjectMocks
   private CsvJobService service;
 
+
+  @Test
+  public void whenRunCsvJob_thenReturnLaunchedJobId()
+    throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException, InvalidFileExtensionException {
+
+    MockMultipartFile mockMultipartFile = new MockMultipartFile(
+      "file",
+      "file.csv",
+      MediaType.MULTIPART_FORM_DATA_VALUE,
+      "Testing;For;A;Better;World".getBytes()
+    );
+
+    final JobExecution jobExecution = new JobExecution(JOB_ID);
+    when(jobLauncher.run(any(), any())).thenReturn(jobExecution);
+
+    final Long jobId = service.runJobCsvImport("_", mockMultipartFile);
+    assertThat(jobId).isEqualTo(JOB_ID);
+  }
 
   @Test
   public void givenJobId_whenGetJobStatus_returnBatchJobStatus() {

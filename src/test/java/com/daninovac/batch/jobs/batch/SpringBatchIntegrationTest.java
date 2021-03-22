@@ -3,6 +3,8 @@ package com.daninovac.batch.jobs.batch;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
+import com.daninovac.batch.jobs.repository.CsvChunkDataRepository;
+import com.daninovac.batch.jobs.repository.XmlDataRepository;
 import com.daninovac.batch.jobs.utils.Constants;
 import com.daninovac.batch.jobs.utils.FileUtils;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,8 +41,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ExtendWith(SpringExtension.class)
 class SpringBatchIntegrationTest {
 
-  private static final String FILE_TO_IMPORT_CSV = "fileToImportThenRemove.csv";
-  private static final String FILE_TO_IMPORT_XML = "fileToImportThenRemove.xml";
+  private static final String FILE_TO_IMPORT_CSV = "fileToImportThenRemoveForUnitTests.csv";
+  private static final String FILE_TO_IMPORT_XML = "fileToImportThenRemoveForUnitTests.xml";
   private static final String TMP_FOLDER_UNIT_TEST_BATCH_JOBS = "tmpFolderUnitTestBatchJobs";
   private static final String FILE_IMPORT_JOB = "fileImportJob";
 
@@ -57,6 +60,12 @@ class SpringBatchIntegrationTest {
   @Autowired
   private JobRepository jobRepository;
 
+  @Autowired
+  private CsvChunkDataRepository csvChunkDataRepository;
+
+  @Autowired
+  private XmlDataRepository xmlDataRepository;
+
   private JobLauncherTestUtils jobLauncherTestUtils;
 
   private File tmpFolder;
@@ -73,6 +82,14 @@ class SpringBatchIntegrationTest {
 
     createTestFolderStructure();
     writeContentToTestFile();
+  }
+
+  @AfterEach
+  public void cleanup() {
+    csvChunkDataRepository.deleteByFilename(FILE_TO_IMPORT_CSV);
+    xmlDataRepository.deleteByFilename(FILE_TO_IMPORT_XML);
+
+    temporaryFolder.delete();
   }
 
   @Test

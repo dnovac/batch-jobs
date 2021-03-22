@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import org.bson.Document;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -49,11 +48,6 @@ public class XmlJobServiceTest {
   @InjectMocks
   private XmlJobService service;
 
-  //TODO: maybe add an @After to delete the temporary file tests
-  @After
-  public void cleanup() {
-
-  }
 
   @Test
   public void whenRunXmlJob_thenReturnLaunchedJobId()

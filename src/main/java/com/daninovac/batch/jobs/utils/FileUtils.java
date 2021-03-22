@@ -86,13 +86,18 @@ public class FileUtils {
       throw new InvalidFileExtensionException("No extension was provided for the file!");
     }
 
+    if (!FileTypeEnum.contains(fileExtension)) {
+      log.error("Invalid file extension!");
+      throw new InvalidFileExtensionException("File extension is not supported!");
+    }
+
     try {
       return FileTypeEnum.valueOfExtension(fileExtension);
     } catch (IllegalArgumentException exception) {
       log.error("File extension not supported!");
       String errorMessage = String.format(
-          "File extension is empty or has invalid extension. Accepted extensions are: %s ",
-          String.join(", ", getNames(FileTypeEnum.class)));
+        "File extension is empty or has invalid extension. Accepted extensions are: %s ",
+        String.join(", ", getNames(FileTypeEnum.class)));
       throw new InvalidFileExtensionException(errorMessage, exception);
     }
   }

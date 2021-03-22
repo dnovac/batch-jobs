@@ -1,18 +1,30 @@
 package com.daninovac.batch.jobs.batch;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.utils.Constants;
+import com.daninovac.batch.jobs.utils.FileUtils;
 import com.daninovac.batch.jobs.web.dto.FileTypeEnum;
 import java.io.File;
 import java.io.IOException;
-import org.junit.Assert;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.Rule;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.TemporaryFolder;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
@@ -27,10 +39,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class SpringBatchIntegrationTest {
 
   private static final String FILE_TO_IMPORT_CSV = "fileToImportThenRemove.csv";
+  private static final String FILE_TO_IMPORT_XML = "fileToImportThenRemove.xml";
   private static final String TMP_FOLDER_UNIT_TEST_BATCH_JOBS = "tmpFolderUnitTestBatchJobs";
+  private static final String FILE_IMPORT_JOB = "fileImportJob";
 
   @Rule
-  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  public final TemporaryFolder temporaryFolder = TemporaryFolder.builder()
+    .assureDeletion()
+    .build();
 
   @Autowired
   private Job fileImportJob;
@@ -45,6 +61,7 @@ class SpringBatchIntegrationTest {
 
   private File tmpFolder;
   private File tmpFile;
+  private File xmlFile;
 
 
   @BeforeEach
@@ -54,51 +71,71 @@ class SpringBatchIntegrationTest {
     this.jobLauncherTestUtils.setJobRepository(jobRepository);
     this.jobLauncherTestUtils.setJob(fileImportJob);
 
+    createTestFolderStructure();
+    writeContentToTestFile();
+  }
+
+  @Test
+  void givenJobParams_testFileImportJob_batchJobCompletedWithSuccessForCSV() throws Exception {
+    JobParameters jobParameters = getJobParams(tmpFile);
+
+    JobExecution jobExecution = this.jobLauncherTestUtils.launchJob(jobParameters);
+    JobInstance actualJobInstance = jobExecution.getJobInstance();
+    ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
+
+    assertThat(actualJobInstance.getJobName()).isEqualTo(FILE_IMPORT_JOB);
+    assertThat(actualJobExitStatus.getExitCode()).isEqualTo(BatchStatus.COMPLETED.name());
+    Assertions.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+  }
+
+  @Test
+  void givenJobParams_testFileImportJob_batchJobCompletedWithSuccessForXML()
+    throws Exception {
+
+    JobParameters jobParameters = getJobParams(xmlFile);
+
+    JobExecution jobExecution = this.jobLauncherTestUtils.launchJob(jobParameters);
+
+    JobInstance actualJobInstance = jobExecution.getJobInstance();
+    ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
+
+    assertThat(actualJobInstance.getJobName()).isEqualTo(FILE_IMPORT_JOB);
+    assertThat(actualJobExitStatus.getExitCode()).isEqualTo(BatchStatus.COMPLETED.name());
+    Assertions.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
+  }
+
+  private void createTestFolderStructure() throws IOException {
     temporaryFolder.create();
     tmpFolder = temporaryFolder.newFolder(TMP_FOLDER_UNIT_TEST_BATCH_JOBS);
     tmpFile = new File(tmpFolder, FILE_TO_IMPORT_CSV);
-    //todo file is not created. Maybe add text to it or change the method of creation
-    System.out.println(tmpFile.exists());
+    xmlFile = new File(tmpFolder, FILE_TO_IMPORT_XML);
   }
 
-  private JobParameters getJobParams() {
+  private void writeContentToTestFile() throws IOException {
+    List<String> lines = Arrays.asList("TEST-The first line", ";The second line");
+    List<String> linesXml = Arrays.asList("<root>TEST-The first line", "The second line</root>");
+
+    Path file = Paths.get(tmpFile.toURI());
+    Path wrongFile = Paths.get(xmlFile.toURI());
+
+    Files.write(file, lines, StandardCharsets.UTF_8);
+    Files.write(wrongFile, linesXml, StandardCharsets.UTF_8);
+  }
+
+
+  private JobParameters getJobParams(File tmpFile) throws InvalidFileExtensionException {
+
+    final String filename = tmpFile.getName();
+    final FileTypeEnum fileExtension = FileUtils.getFileExtension(filename);
 
     return new JobParametersBuilder()
       .addString(Constants.PATH_TO_UPLOADED_FILE, tmpFile.getAbsolutePath())
       .addString(Constants.PATH_TO_TEMP_FOLDER, tmpFolder.getAbsolutePath())
       .addString(Constants.DELIMITER, ";")
-      .addString(Constants.FILENAME, FILE_TO_IMPORT_CSV)
-      .addString(Constants.FILE_EXTENSION, FileTypeEnum.CSV.name())
+      .addString(Constants.FILENAME, filename)
+      .addString(Constants.FILE_EXTENSION, fileExtension.name())
       .addLong(Constants.TIME, System.currentTimeMillis())
       .toJobParameters();
   }
 
-  @Test
-  public void testMyJob() throws Exception {
-    // given
-    JobParameters jobParameters = getJobParams();
-
-    // when
-    JobExecution jobExecution = this.jobLauncherTestUtils.launchJob(jobParameters);
-
-    // then
-    Assert.assertEquals(ExitStatus.COMPLETED, jobExecution.getExitStatus());
-  }
-
-  /*@Test
-  public void givenReferenceOutput_whenJobExecuted_thenSuccess() throws Exception {
-    // given
-    FileSystemResource expectedResult = new FileSystemResource("EXPECTED_OUTPUT");
-    FileSystemResource actualResult = new FileSystemResource("TEST_OUTPUT");
-
-    // when
-    JobExecution jobExecution = jobLauncherTestUtils.launchJob(testJobParams());
-    JobInstance actualJobInstance = jobExecution.getJobInstance();
-    ExitStatus actualJobExitStatus = jobExecution.getExitStatus();
-
-    // then
-    assertThat(actualJobInstance.getJobName()).isEqualTo("fileImportJob");
-    assertThat(actualJobExitStatus.getExitCode()).isEqualTo("COMPLETED");
-    AssertFile.assertFileEquals(expectedResult, actualResult);
-  }*/
 }

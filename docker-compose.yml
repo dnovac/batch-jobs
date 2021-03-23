@@ -21,7 +21,7 @@ services:
 volumes:
   mongodata:
 
-# TODO: Not working yet together with mongo. Container cannot communicate to the other.
+# TODO: Not working yet together with mongo. Container cannot communicate to the one with mongo.
 #  app:
 #    build: ./
 #    container_name: docker_batchjobs

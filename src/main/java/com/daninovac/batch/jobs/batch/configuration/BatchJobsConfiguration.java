@@ -13,7 +13,6 @@ import org.springframework.batch.core.configuration.annotation.JobBuilderFactory
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.job.builder.FlowBuilder;
 import org.springframework.batch.core.job.flow.Flow;
-import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,7 +31,7 @@ public class BatchJobsConfiguration {
 
   @Bean
   public ThreadPoolTaskExecutor jobLauncherTaskExecutor(
-      @Value("${batch.max-jobs:10}") Integer maxJobs
+    @Value("${batch.max-jobs:10}") Integer maxJobs
   ) {
     ThreadPoolTaskExecutor threadPoolExecutor = new ThreadPoolTaskExecutor();
     threadPoolExecutor.setMaxPoolSize(maxJobs);
@@ -47,36 +46,36 @@ public class BatchJobsConfiguration {
 
   @Bean
   public Job fileImportJob(
-      ImportTypeDecider fileTypeDecider,
-      Step loggerStep,
-      Flow importCsvFlow,
-      Flow importXmlFlow
+    ImportTypeDecider fileTypeDecider,
+    Step loggerStep,
+    Flow importCsvFlow,
+    Flow importXmlFlow
   ) {
     return jobBuilderFactory
-        .get("fileImportJob")
-        .start(loggerStep)
-        .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
-        .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
-        .end()
-        .build();
+      .get("fileImportJob")
+      .start(loggerStep)
+      .next(fileTypeDecider).on(FileTypeEnum.XML.name()).to(importXmlFlow)
+      .from(fileTypeDecider).on(FileTypeEnum.CSV.name()).to(importCsvFlow)
+      .end()
+      .build();
   }
 
   @Bean
   public Flow importCsvFlow(
-      Step importCsvDataStep
+    Step importCsvDataStep
   ) {
     return new FlowBuilder<Flow>("importCsvFlow")
-        .start(importCsvDataStep)
-        .end();
+      .start(importCsvDataStep)
+      .end();
   }
 
   @Bean
   public Flow importXmlFlow(
-      Step importXmlDataStep
+    Step importXmlDataStep
   ) {
     return new FlowBuilder<Flow>("importXmlFlow")
-        .start(importXmlDataStep)
-        .end();
+      .start(importXmlDataStep)
+      .end();
   }
 
   @Bean
@@ -86,12 +85,12 @@ public class BatchJobsConfiguration {
 
   @Bean
   public Step loggerStep(
-      StepBuilderFactory stepBuilderFactory,
-      LoggerTasklet loggerTasklet
+    StepBuilderFactory stepBuilderFactory,
+    LoggerTasklet loggerTasklet
   ) {
     return stepBuilderFactory.get("loggerStep")
-        .tasklet(loggerTasklet)
-        .build();
+      .tasklet(loggerTasklet)
+      .build();
   }
 
 }

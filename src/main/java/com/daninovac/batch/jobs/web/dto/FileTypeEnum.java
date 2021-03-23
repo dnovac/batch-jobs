@@ -1,21 +1,15 @@
 package com.daninovac.batch.jobs.web.dto;
 
-import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 
-/**
- * @author dan on 27/08/2020
- * @project batch-jobs
- */
 @RequiredArgsConstructor
 public enum FileTypeEnum {
   CSV("csv"),
-  XML("xml"),
-  JSON("json");
+  XML("xml");
 
   private static final Map<String, FileTypeEnum> BY_EXTENSION = new HashMap<>();
 
@@ -25,6 +19,16 @@ public enum FileTypeEnum {
     for (FileTypeEnum e : values()) {
       BY_EXTENSION.put(e.extension, e);
     }
+  }
+
+  public static boolean contains(String test) {
+
+    for (FileTypeEnum type : FileTypeEnum.values()) {
+      if (type.name().equalsIgnoreCase(test)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static FileTypeEnum valueOfExtension(String extension) {

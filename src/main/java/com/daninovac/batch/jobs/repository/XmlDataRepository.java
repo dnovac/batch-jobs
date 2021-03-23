@@ -14,5 +14,7 @@ public interface XmlDataRepository extends MongoRepository<XmlDataDocument, Stri
 
   List<XmlDataDocument> findByFilename(String filename);
 
+  void deleteByFilename(String filename);
+
 
 }

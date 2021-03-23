@@ -11,4 +11,6 @@ public interface CsvChunkDataRepository extends MongoRepository<CsvDataChunk, St
   List<CsvDataChunk> findByFilename(String filename);
 
   List<CsvDataChunk> findByType(String type);
+
+  void deleteByFilename(String filename);
 }

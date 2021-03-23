@@ -2,6 +2,7 @@ package com.daninovac.batch.jobs.web;
 
 import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.XmlJobService;
+import com.daninovac.batch.jobs.web.dto.ResponseBodyDTO;
 import com.daninovac.batch.jobs.web.dto.XmlFileDataDTO;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,7 @@ public class XmlJobController {
   private final XmlJobService service;
 
   @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<Long> triggerImportCsvJob(
+  public ResponseEntity<ResponseBodyDTO> triggerImportCsvJob(
     @RequestParam MultipartFile file
   )
     throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
@@ -45,7 +46,7 @@ public class XmlJobController {
     log.info("Starting job XML-Import for file: [{}] bytes", file.getSize());
     Long jobId = service.runJobXmlImport(file);
 
-    return ResponseEntity.accepted().body(jobId);
+    return ResponseEntity.accepted().body(new ResponseBodyDTO(jobId));
   }
 
   @GetMapping("/data/{filename}")

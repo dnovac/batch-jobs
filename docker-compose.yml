@@ -1,32 +1,45 @@
-version: '3.4'
+version: '3.8'
 
 services:
+
   mongo:
-    image: mongo:latest
+    image: mongo:4.4
     container_name: mongo
     hostname: mongo
     networks:
-      - gateway
+      - main-network
     volumes:
       - mongodata:/data/db
+      - mongodata:/var/log/mongodb
+      - mongodata:/docker-entrypoint-initdb.d/
     restart: always
     ports:
       - "27017:27017"
+    command: [ "--bind_ip", "0.0.0.0" ]
 
   app:
     build:
-      context: ./
+      context: .
+      dockerfile: Dockerfile
     container_name: batch-jobs
-    networks:
-      - gateway
+    image: batch-jobs
     depends_on:
       - mongo
+    environment:
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=batchjobs
     ports:
       - "8080:8080"
+    networks:
+      - main-network
 
 networks:
-  gateway:
-    driver: bridge
+  main-network:
+    external:
+      name: batchjobs-network
 
+# needed in order to work properly on Windows:
+# https://stackoverflow.com/questions/54911021/unable-to-start-docker-mongo-image-on-windows
 volumes:
   mongodata:

@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<String> handleInvalidFileExtensionException(
       InvalidFileExtensionException e) {
 
-    log.info("Invalid file extension exception occurred: {}", e.getMessage());
+    log.error("Invalid file extension exception occurred: {}", e.getMessage());
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 

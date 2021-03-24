@@ -1,35 +1,45 @@
-version: '3.1'
+version: '3.8'
 
 services:
+
   mongo:
-    image: mongo:latest
-    container_name: docker_mongo
+    image: mongo:4.4
+    container_name: mongo
     hostname: mongo
+    networks:
+      - main-network
     volumes:
       - mongodata:/data/db
-      - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongodata:/var/log/mongodb
+      - mongodata:/docker-entrypoint-initdb.d/
     restart: always
     ports:
       - "27017:27017"
-    env_file:
-      - .env
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    command: [ "--bind_ip", "0.0.0.0" ]
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: batch-jobs
+    image: batch-jobs
+    depends_on:
+      - mongo
+    environment:
+      - SPRING_DATA_MONGODB_HOST=mongo
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=batchjobs
+    ports:
+      - "8080:8080"
+    networks:
+      - main-network
+
+networks:
+  main-network:
+    external:
+      name: batchjobs-network
+
+# needed in order to work properly on Windows:
+# https://stackoverflow.com/questions/54911021/unable-to-start-docker-mongo-image-on-windows
 volumes:
   mongodata:
-
-# TODO: Not working yet together with mongo. Container cannot communicate to the one with mongo.
-#  app:
-#    build: ./
-#    container_name: docker_batchjobs
-#    restart: always
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - mongo
-#    working_dir: /opt/app
-#    image: dg-docker-spring-http-alpine-j
-

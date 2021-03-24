@@ -83,7 +83,8 @@ public class FileUtils {
 
     if (fileExtension.isEmpty()) {
       log.error("File missing extension!");
-      throw new InvalidFileExtensionException("No extension was provided for the file!");
+      throw new InvalidFileExtensionException(
+        "No file extension was provided! Supported formats are: csv, xml");
     }
 
     if (!FileTypeEnum.contains(fileExtension)) {

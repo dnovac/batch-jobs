@@ -1,35 +1,32 @@
-version: '3.1'
+version: '3.4'
 
 services:
   mongo:
     image: mongo:latest
-    container_name: docker_mongo
+    container_name: mongo
     hostname: mongo
+    networks:
+      - gateway
     volumes:
       - mongodata:/data/db
-      - ./docker/mongodb/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     restart: always
     ports:
       - "27017:27017"
-    env_file:
-      - .env
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+
+  app:
+    build:
+      context: ./
+    container_name: batch-jobs
+    networks:
+      - gateway
+    depends_on:
+      - mongo
+    ports:
+      - "8080:8080"
+
+networks:
+  gateway:
+    driver: bridge
 
 volumes:
   mongodata:
-
-# TODO: Not working yet together with mongo. Container cannot communicate to the one with mongo.
-#  app:
-#    build: ./
-#    container_name: docker_batchjobs
-#    restart: always
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - mongo
-#    working_dir: /opt/app
-#    image: dg-docker-spring-http-alpine-j
-

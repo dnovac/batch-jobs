@@ -1,22 +1,8 @@
-# build image from openjdk alpine image
 FROM openjdk:14-alpine
-
-# Required for starting application up.
-RUN apk update && apk add bash
-
-# Create /opt/app for our java application
-RUN mkdir -p /opt/app
-ENV PROJECT_HOME /opt/app
-
-COPY target/batch-jobs-0.0.1-SNAPSHOT.jar $PROJECT_HOME/batch-jobs.jar
-
+VOLUME /tmp
 EXPOSE 8080
-
-WORKDIR $PROJECT_HOME
-#ADD target/batch-jobs-0.0.1-SNAPSHOT.jar batch-jobs.jar
-ENTRYPOINT ["java","-jar","batch-jobs.jar"]
-
-CMD ["java","-Dspring.data.mongodb.uri=mongodb://docker_mongo:27017/batchjobs","-Djava.security.egd=file:/dev/./urandom","-jar","./batch-jobs-0.0.1-SNAPSHOT.jar"]
+ADD target/batch-jobs-0.0.1-SNAPSHOT.jar batch-jobs.jar
+ENTRYPOINT ["java","-Dspring.data.mongodb.host=mongo","-Dspring.data.mongodb.database=batchjobs","-Dspring.data.mongodb.port=27017","-Djava.security.egd=file:/dev/./urandom","-jar","batch-jobs.jar"]
 
 
 

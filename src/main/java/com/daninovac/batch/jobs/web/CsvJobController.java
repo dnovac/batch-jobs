@@ -5,6 +5,7 @@ import com.daninovac.batch.jobs.exception.InvalidFileExtensionException;
 import com.daninovac.batch.jobs.service.CsvJobService;
 import com.daninovac.batch.jobs.web.dto.CsvFileDataDTO;
 import com.daninovac.batch.jobs.web.dto.ResponseBodyDTO;
+import io.swagger.annotations.ApiParam;
 import java.io.IOException;
 import javax.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -34,21 +35,24 @@ public class CsvJobController {
 
   @PostMapping(value = "/import")
   public ResponseEntity<ResponseBodyDTO> triggerImportCsvJob(
-    @RequestParam @Size(max = 1) String delimiter,
-    @RequestParam MultipartFile file
+      @ApiParam(type = "String", value = ",", required = true)
+      @RequestParam @Size(max = 1) String delimiter,
+      @RequestParam MultipartFile file
   )
-    throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
-    IOException, JobParametersInvalidException, InvalidFileExtensionException {
+      throws JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException,
+      IOException, JobParametersInvalidException, InvalidFileExtensionException {
 
     log.info("Starting job CSV-Import for file: [{}] bytes and delimiter [{}]", file.getSize(),
-      delimiter);
+        delimiter);
     Long jobId = csvJobService.runJobCsvImport(delimiter, file);
 
     return ResponseEntity.accepted().body(new ResponseBodyDTO(jobId));
   }
 
   @GetMapping("/data/{filename}")
-  public CsvFileDataDTO findDataByFilename(@PathVariable String filename) {
+  public CsvFileDataDTO findDataByFilename(
+      @ApiParam(type = "String", value = "netflix_titles.csv", required = true)
+      @PathVariable String filename) {
 
     return csvJobService.findAllDataByFilename(filename);
   }

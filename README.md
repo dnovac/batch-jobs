@@ -13,7 +13,7 @@ only after the application is deployed on the local computer.
 ## Deploy
 Run these commands in order to build the app, and deploy it in a container, using Docker and docker-compose
 
-* `mvn clean install` - builds the app and creates .jar file in the `./target` folder
+* `mvn clean install -DskipTests=true` - builds the app and creates .jar file in the `./target` folder
 
 * `docker network create main-network` - create the network needed for the java and mongo containers to communicate
 
